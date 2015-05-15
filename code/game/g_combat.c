@@ -1071,6 +1071,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	asave = CheckArmor (targ, take, dflags);
 	take -= asave;
 
+	if ((targ == attacker) && !g_selfDamage.integer)
+		take = 0;
+	
 	if ( g_debugDamage.integer ) {
 		G_Printf( "%i: player:%i health:%i damage:%i armor:%i\n", level.time, targ->s.number,
 			targ->health, take, asave );
