@@ -204,8 +204,10 @@ void CG_ParseServerinfo( void ) {
 	Q_strncpyz( cgs.gametypeName, Info_ValueForKey( info, "sv_gametypeName" ), sizeof (cgs.gametypeName) );
 	cgs.gametype = atoi( Info_ValueForKey( info, "g_gametype" ) );
 	trap_Cvar_SetValue("g_gametype", cgs.gametype);
-	cgs.dmflags = atoi( Info_ValueForKey( info, "dmflags" ) );
+	cgs.footSteps = atoi( Info_ValueForKey( info, "g_footSteps" ) );
+	cgs.fixedFOV = atoi( Info_ValueForKey( info, "g_fixedFOV" ) );
 	cgs.fraglimit = atoi( Info_ValueForKey( info, "fraglimit" ) );
+	cgs.fallDamage = atoi( Info_ValueForKey( info, "g_fallDamage" ) );
 	cgs.capturelimit = atoi( Info_ValueForKey( info, "capturelimit" ) );
 	cgs.timelimit = atoi( Info_ValueForKey( info, "timelimit" ) );
 	cgs.maxplayers = atoi( Info_ValueForKey( info, "sv_maxclients" ) );

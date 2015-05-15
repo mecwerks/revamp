@@ -567,8 +567,8 @@ static int CG_CalcFov( void ) {
 		cg.fov = fov_x = 90;
 	} else {
 		// user selectable
-		if ( cgs.dmflags & DF_FIXED_FOV ) {
-			// dmflag to prevent wide fov for all players
+		if ( cgs.fixedFOV ) {
+			// prevent wide fov for all players
 			fov_x = 90;
 		} else {
 			fov_x = cg_fov.value;

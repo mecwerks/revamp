@@ -1234,7 +1234,9 @@ typedef struct {
 	// parsed from serverinfo
 	char			gametypeName[MAX_NAME_LENGTH];
 	gametype_t		gametype;
-	int				dmflags;
+	qboolean		footSteps;
+	qboolean		fixedFOV;
+	qboolean		fallDamage;
 	int				fraglimit;
 	int				capturelimit;
 	int				timelimit;

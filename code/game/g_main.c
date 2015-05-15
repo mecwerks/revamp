@@ -61,12 +61,10 @@ gplayer_t		g_players[MAX_CLIENTS];
 gconnection_t	g_connections[MAX_CLIENTS];
 
 vmCvar_t	g_gametype;
-vmCvar_t	g_dmflags;
 vmCvar_t	g_fraglimit;
 vmCvar_t	g_timelimit;
 vmCvar_t	g_capturelimit;
 vmCvar_t	g_friendlyFire;
-vmCvar_t	g_selfDamage;
 vmCvar_t	g_password;
 vmCvar_t	g_needpass;
 vmCvar_t	g_maxplayers;
@@ -118,6 +116,12 @@ vmCvar_t	g_proxMineTimeout;
 #endif
 vmCvar_t	g_playerCapsule;
 
+// Mecwerks: new cvars
+vmCvar_t	g_selfDamage;
+vmCvar_t	g_fallDamage;
+vmCvar_t	g_footSteps;
+vmCvar_t	g_fixedFOV;
+
 static cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, 0, RANGE_ALL },
@@ -134,18 +138,16 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_maxGamePlayers, "g_maxGameClients", "0", CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0, RANGE_INT(0, MAX_CLIENTS-1) },
 
 	// change anytime vars
-	{ &g_dmflags, "dmflags", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_ALL },
 	{ &g_fraglimit, "fraglimit", "20", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, GCF_TRACK_CHANGE, RANGE_ALL },
 	{ &g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, GCF_TRACK_CHANGE, RANGE_ALL },
 	{ &g_capturelimit, "capturelimit", "8", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, GCF_TRACK_CHANGE, RANGE_ALL },
 
 	{ &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, RANGE_BOOL },
 
-	{ &g_friendlyFire, "g_friendlyFire", "0", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
-	{ &g_selfDamage, "g_selfDamage", "0", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
-
 	{ &g_teamAutoJoin, "g_teamAutoJoin", "0", CVAR_ARCHIVE, 0, RANGE_BOOL },
 	{ &g_teamForceBalance, "g_teamForceBalance", "0", CVAR_ARCHIVE, 0, RANGE_BOOL },
+
+	{ &g_friendlyFire, "g_friendlyFire", "0", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
 
 	{ &g_warmup, "g_warmup", "20", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_ALL },
 	{ &g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
@@ -201,7 +203,12 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &pmove_fixed, "pmove_fixed", "0", CVAR_SYSTEMINFO, 0, RANGE_BOOL },
 	{ &pmove_msec, "pmove_msec", "8", CVAR_SYSTEMINFO, 0, RANGE_ALL },
 
-	{ &g_rankings, "g_rankings", "0", 0, 0, RANGE_ALL }
+	{ &g_rankings, "g_rankings", "0", 0, 0, RANGE_ALL },
+
+	{ &g_selfDamage, "g_selfDamage", "1", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
+	{ &g_fallDamage, "g_fallDamage", "1", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
+	{ &g_footSteps, "g_footSteps", "1", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
+	{ &g_fixedFOV, "g_fixedFOV", "0", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL }
 
 };
 

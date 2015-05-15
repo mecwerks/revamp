@@ -558,9 +558,10 @@ void PlayerEvents( gentity_t *ent, int oldEventSequence ) {
 			if ( ent->s.eType != ET_PLAYER ) {
 				break;		// not in the player model
 			}
-			if ( g_dmflags.integer & DF_NO_FALLING ) {
+			if ( !g_fallDamage.integer ) {
 				break;
 			}
+
 			if ( event == EV_FALL_FAR ) {
 				damage = 10;
 			} else {
@@ -912,7 +913,7 @@ void PlayerThink_real( gentity_t *ent ) {
 	}
 	pm.pointcontents = trap_PointContents;
 	pm.debugLevel = g_debugMove.integer;
-	pm.noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
+	pm.noFootsteps = !g_footSteps.integer;
 
 	pm.pmove_fixed = pmove_fixed.integer | player->pers.pmoveFixed;
 	pm.pmove_msec = pmove_msec.integer;

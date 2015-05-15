@@ -761,12 +761,10 @@ extern	vmCvar_t	g_maxplayers;			// allow this many total, including spectators
 extern	vmCvar_t	g_maxGamePlayers;		// allow this many active
 extern	vmCvar_t	g_restarted;
 
-extern	vmCvar_t	g_dmflags;
 extern	vmCvar_t	g_fraglimit;
 extern	vmCvar_t	g_timelimit;
 extern	vmCvar_t	g_capturelimit;
 extern	vmCvar_t	g_friendlyFire;
-extern  vmCvar_t	g_selfDamage;
 extern	vmCvar_t	g_password;
 extern	vmCvar_t	g_needpass;
 extern	vmCvar_t	g_gravity;
@@ -806,3 +804,8 @@ extern	vmCvar_t	g_singlePlayer;
 extern	vmCvar_t	g_proxMineTimeout;
 extern	vmCvar_t	g_playerCapsule;
 
+// Mecwerks: new cvars
+extern  vmCvar_t	g_selfDamage;
+extern  vmCvar_t	g_fallDamage;
+extern	vmCvar_t	g_footSteps;
+extern	vmCvar_t	g_fixedFOV;
