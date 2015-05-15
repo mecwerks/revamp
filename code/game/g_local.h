@@ -809,3 +809,4 @@ extern  vmCvar_t	g_selfDamage;
 extern  vmCvar_t	g_fallDamage;
 extern	vmCvar_t	g_footSteps;
 extern	vmCvar_t	g_fixedFOV;
+extern 	vmCvar_t	g_weaponMods;
