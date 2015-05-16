@@ -3,7 +3,7 @@ language: c
 env:
   global:
     # coverity token
-    - secure: "THWKfpOxFbQxX8Oyg8qkNaPACdOqx4KljQYytfoSzEpGuWgDLzP5YUTq0jiZLm5BRCY3Vj+GbmYGUectpEJQ7UyccfxUipmuAMEpW1zcwzl5Pdspyz2O1rJVh5pb/qRss7VSmyieh8OJYyl5W//HGxsDU29rDPRP4oW6k2k3Zvs="
+    - secure: ""
   matrix:
     # standard builds
     - CC=gcc
@@ -20,16 +20,15 @@ before_install:
   - sudo apt-get install -q -y mingw-w64
 
 notifications:
-  irc: "irc.freenode.org#spearmint"
+  irc: "irc.freenode.org#mecwerks"
   on_success: change
   on_failure: always
 
 addons:
   coverity_scan:
     project:
-      name: "zturtleman/mint-arena"
+      name: "mecwerks/revamp"
       description: "Build submitted via Travis CI"
-    notification_email: zturtleman@gmail.com
     build_command_prepend: "make clean"
     build_command: "make release"
     branch_pattern: master
