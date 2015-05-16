@@ -59,6 +59,28 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define FL_NO_HUMANS			0x00004000	// spawn point just for bots
 #define FL_FORCE_GESTURE		0x00008000	// force gesture on player
 
+// gclient->lasthurt_location flags
+#define LOCATION_NONE 0x00001
+
+// Height layers
+#define LOCATION_HEAD 		0x00002
+#define LOCATION_FACE		0x00004
+
+#define LOCATION_SHOULDER 	0x00008
+#define LOCATION_CHEST		0x00010
+#define LOCATION_STOMACH	0x00020
+
+#define LOCATION_GROIN		0x00040
+
+#define LOCATION_LEG		0x00080
+#define LOCATION_FOOT		0x00100
+
+// Relative direction
+#define LOCATION_LEFT		0x00200
+#define LOCATION_RIGHT		0x00400
+#define LOCATION_FRONT		0x00800
+#define LOCATION_BACK		0x01000
+
 // movers are things like doors, plats, buttons, etc
 typedef enum {
 	MOVER_POS1,
@@ -326,6 +348,7 @@ struct gplayer_s {
 	int			lastkilled_player;	// last player that this player killed
 	int			lasthurt_player;	// last player that damaged this player
 	int			lasthurt_mod;		// type of damage the player did
+	int 		lasthurt_location;	// location of the hit
 
 	// timers
 	int			respawnTime;		// can respawn when time > this, force after g_forcerespwan

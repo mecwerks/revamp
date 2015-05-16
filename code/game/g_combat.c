@@ -865,6 +865,163 @@ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t i
 	}
 }
 #endif
+
+typedef struct {
+	int weapon;
+	int damageMod[6];
+} weaponDamageMod_t;
+
+weaponDamageMod_t weaponMods[WP_NUM_WEAPONS] = {
+	{ WP_NONE, 				{ 0, 0, 0, 0, 0, 0 } },
+
+	{ WP_GAUNTLET, 			{ 1, 1, 1, 1, 1, 1 } },
+	{ WP_MACHINEGUN, 		{ 1, 1, 1, 1, 1, 1 } },
+	{ WP_SHOTGUN, 			{ 1, 1, 1, 1, 1, 1 } },
+	{ WP_GRENADE_LAUNCHER, 	{ 1, 1, 1, 1, 1, 1 } },
+	{ WP_ROCKET_LAUNCHER, 	{ 1, 1, 1, 1, 1, 1 } },
+	{ WP_LIGHTNING, 		{ 1, 1, 1, 1, 1, 1 } },
+	{ WP_RAILGUN, 			{ 1, 1, 1, 1, 1, 1 } },
+	{ WP_PLASMAGUN, 		{ 1, 1, 1, 1, 1, 1 } },
+	{ WP_BFG, 				{ 1, 1, 1, 1, 1, 1 } },
+	{ WP_GRAPPLING_HOOK, 	{ 0, 0, 0, 0, 0, 0 } }
+};
+
+// head, neak, arms, chest, belly, legs
+
+/*
+============
+G_WeaponDamageModifier
+============
+*/
+int G_WeaponDamageModifier(int location, int take, int weapon) {
+	int i;
+	weaponDamageMod_t *wpMod = NULL;
+
+	for (i = WP_NONE+1; i < WP_NUM_WEAPONS; i++) {
+		if (weaponMods[i].weapon == weapon)
+			wpMod = &weaponMods[i];
+	}
+
+	if (!wpMod) {
+		return take;
+	}
+
+	// Check the location ignoring the rotation info
+	switch (location &  ~(LOCATION_BACK | LOCATION_LEFT | LOCATION_RIGHT | LOCATION_FRONT)) {
+		case LOCATION_HEAD:
+		case LOCATION_FACE:
+			take *= wpMod->damageMod[0]; // head
+			break;
+		case LOCATION_SHOULDER:
+			if (location & (LOCATION_FRONT | LOCATION_BACK))
+				take *= wpMod->damageMod[1]; // neck
+			else
+				take *= wpMod->damageMod[2]; // shoulders
+			break;
+		case LOCATION_CHEST:
+			if (location & (LOCATION_FRONT | LOCATION_BACK))
+				take *= wpMod->damageMod[4]; // Belly or back
+			else
+				take *= wpMod->damageMod[2]; // Arms
+			break;
+		case LOCATION_STOMACH:
+			take *= wpMod->damageMod[3]; // belly
+			break;
+		case LOCATION_GROIN:
+			// if (targ->player->lasthurt_location & LOCATION_FRONT)
+			// 	take *= 1.3; // Groin shot
+			// break;
+		case LOCATION_LEG:
+			// take *= 0.7;
+			// break;
+		case LOCATION_FOOT:
+	//		take *= 0.5;
+			take *= wpMod->damageMod[5]; // waist down 
+			break;
+	}
+
+	return take;
+}
+
+/* 
+============
+G_LocationDamage
+============
+*/
+int G_LocationDamage(vec3_t point, gentity_t* targ, gentity_t* attacker, int take) {
+	vec3_t bulletPath;
+	vec3_t bulletAngle;
+
+	int clientHeight;
+	int clientFeetZ;
+	int clientRotation;
+	int bulletHeight;
+	int bulletRotation;	// Degrees rotation around client.
+				// used to check Back of head vs. Face
+	int impactRotation;
+
+
+	// First things first.  If we're not damaging them, why are we here? 
+	if (!take) 
+		return 0;
+
+	// Point[2] is the REAL world Z. We want Z relative to the clients feet
+	
+	// Where the feet are at [real Z]
+	clientFeetZ  = targ->r.currentOrigin[2] + targ->s.mins[2];	
+	// How tall the client is [Relative Z]
+	clientHeight = targ->s.maxs[2] - targ->s.mins[2];
+	// Where the bullet struck [Relative Z]
+	bulletHeight = point[2] - clientFeetZ;
+
+	// Get a vector aiming from the client to the bullet hit 
+	VectorSubtract(targ->r.currentOrigin, point, bulletPath); 
+	// Convert it into PITCH, ROLL, YAW
+	vectoangles(bulletPath, bulletAngle);
+
+	clientRotation = targ->player->ps.viewangles[YAW];
+	bulletRotation = bulletAngle[YAW];
+
+	impactRotation = abs(clientRotation-bulletRotation);
+	
+	impactRotation += 45; // just to make it easier to work with
+	impactRotation = impactRotation % 360; // Keep it in the 0-359 range
+
+	if (impactRotation < 90)
+		targ->player->lasthurt_location = LOCATION_BACK;
+	else if (impactRotation < 180)
+		targ->player->lasthurt_location = LOCATION_RIGHT;
+	else if (impactRotation < 270)
+		targ->player->lasthurt_location = LOCATION_FRONT;
+	else if (impactRotation < 360)
+		targ->player->lasthurt_location = LOCATION_LEFT;
+	else
+		targ->player->lasthurt_location = LOCATION_NONE;
+
+	// The upper body never changes height, just distance from the feet
+		if (bulletHeight > clientHeight - 2)
+			targ->player->lasthurt_location |= LOCATION_HEAD;
+		else if (bulletHeight > clientHeight - 8)
+			targ->player->lasthurt_location |= LOCATION_FACE;
+		else if (bulletHeight > clientHeight - 10)
+			targ->player->lasthurt_location |= LOCATION_SHOULDER;
+		else if (bulletHeight > clientHeight - 16)
+			targ->player->lasthurt_location |= LOCATION_CHEST;
+		else if (bulletHeight > clientHeight - 26)
+			targ->player->lasthurt_location |= LOCATION_STOMACH;
+		else if (bulletHeight > clientHeight - 29)
+			targ->player->lasthurt_location |= LOCATION_GROIN;
+		else if (bulletHeight < 4)
+			targ->player->lasthurt_location |= LOCATION_FOOT;
+		else
+			// The leg is the only thing that changes size when you duck,
+			// so we check for every other parts RELATIVE location, and
+			// whats left over must be the leg. 
+			targ->player->lasthurt_location |= LOCATION_LEG; 
+
+	return G_WeaponDamageModifier(targ->player->lasthurt_location, take, attacker->player->ps.weapon);
+}
+
 /*
 ============
 G_Damage
@@ -1113,6 +1270,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		// set the last player who damaged the target
 		targ->player->lasthurt_player = attacker->s.number;
 		targ->player->lasthurt_mod = mod;
+
+		if (point && targ && targ->health && attacker && take)
+			take = G_LocationDamage(point, targ, attacker, take);
+		else
+			targ->player->lasthurt_location = LOCATION_NONE;
 	}
 
 	// do the damage
