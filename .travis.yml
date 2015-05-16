@@ -1,9 +1,6 @@
 language: c
 
 env:
-  global:
-    # coverity token
-    - secure: ""
   matrix:
     # standard builds
     - CC=gcc
