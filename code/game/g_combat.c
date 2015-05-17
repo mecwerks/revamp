@@ -868,43 +868,43 @@ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t i
 
 typedef struct {
 	int weapon;
-	float damageMod[6];
+	float damageMod[3];
 } weaponDamageMod_t;
 
 weaponDamageMod_t weaponMods[WP_NUM_WEAPONS] = {
 	{ WP_NONE,
-		// head, neak, arms, chest, belly, legs
-		{0, 0, 0, 0, 0, 0} },
+		// head, torso, legs
+		{0, 0, 0} },
 
 	{ WP_GAUNTLET,
-		{2, 1.5, 1, 1.3, 1.3, 1} },
+		{1, 1, 1} },
 
 	{ WP_MACHINEGUN,
-		{1.5, 1.3, 1, 1.1, 1.1, 1} },
+		{1, 1, 1} },
 
 	{ WP_SHOTGUN,
-		{1.3, 1.2, 1.1, 1.1, 1.1, 1} },
+		{1, 1, 1} },
 	
 	{ WP_GRENADE_LAUNCHER,
-		{1.4, 1.4, 1.2, 1.3, 1.4, 1.2} },
+		{1, 1, 1} },
 
 	{ WP_ROCKET_LAUNCHER,
-		{1.4, 1.4, 1.2, 1.3, 1.3, 1.2} },
+		{1, 1, 1} },
 
 	{ WP_LIGHTNING,
-		{1.4, 1.3, 1.3, 1.3, 1.3, 1.2} },
+		{1, 1, 1} },
 
 	{ WP_RAILGUN,
-		{1.5, 1.2, 1, 1.1, 1.1, 1} },
+		{1, 1, 1} },
 
 	{ WP_PLASMAGUN,
-		{1.3, 1.2, 1.2, 1.2, 1.2, 1} },
+		{1, 1, 1} },
 
 	{ WP_BFG,
-		{1.1, 1.1, 1, 1.1, 1.1, 1} },
+		{1, 1, 1} },
 
 	{ WP_GRAPPLING_HOOK,
-		{0, 0, 0, 0, 0, 0} }
+		{0, 0, 0} }
 };
 
 /*
@@ -966,30 +966,14 @@ int G_WeaponDamageModifier(int location, int otake, int weapon) {
 			take *= wpMod->damageMod[0]; // head
 			break;
 		case LOCATION_SHOULDER:
-			if (location & (LOCATION_FRONT | LOCATION_BACK))
-				take *= wpMod->damageMod[1]; // neck
-			else
-				take *= wpMod->damageMod[2]; // shoulders
-			break;
 		case LOCATION_CHEST:
-			if (location & (LOCATION_FRONT | LOCATION_BACK))
-				take *= wpMod->damageMod[3]; // chest
-			else
-				take *= wpMod->damageMod[2]; // Arms
-			break;
 		case LOCATION_STOMACH:
-			take *= wpMod->damageMod[4]; // belly
+			take *= wpMod->damageMod[1]; // torso
 			break;
 		case LOCATION_GROIN:
-			// if (targ->player->lasthurt_location & LOCATION_FRONT)
-			// 	take *= 1.3; // Groin shot
-			// break;
 		case LOCATION_LEG:
-			// take *= 0.7;
-			// break;
 		case LOCATION_FOOT:
-	//		take *= 0.5;
-			take *= wpMod->damageMod[5]; // waist down 
+			take *= wpMod->damageMod[2]; // legs
 			break;
 	}
 
@@ -1052,25 +1036,25 @@ int G_LocationDamage(vec3_t point, gentity_t* targ, gentity_t* attacker, int tak
 		targ->player->lasthurt_location = LOCATION_NONE;
 
 	// The upper body never changes height, just distance from the feet
-		if (bulletHeight > clientHeight - 2)
-			targ->player->lasthurt_location |= LOCATION_HEAD;
-		else if (bulletHeight > clientHeight - 8)
-			targ->player->lasthurt_location |= LOCATION_FACE;
-		else if (bulletHeight > clientHeight - 10)
-			targ->player->lasthurt_location |= LOCATION_SHOULDER;
-		else if (bulletHeight > clientHeight - 16)
-			targ->player->lasthurt_location |= LOCATION_CHEST;
-		else if (bulletHeight > clientHeight - 26)
-			targ->player->lasthurt_location |= LOCATION_STOMACH;
-		else if (bulletHeight > clientHeight - 29)
-			targ->player->lasthurt_location |= LOCATION_GROIN;
-		else if (bulletHeight < 4)
-			targ->player->lasthurt_location |= LOCATION_FOOT;
-		else
-			// The leg is the only thing that changes size when you duck,
-			// so we check for every other parts RELATIVE location, and
-			// whats left over must be the leg. 
-			targ->player->lasthurt_location |= LOCATION_LEG; 
+	if (bulletHeight > clientHeight - 2)
+		targ->player->lasthurt_location |= LOCATION_HEAD;
+	else if (bulletHeight > clientHeight - 8)
+		targ->player->lasthurt_location |= LOCATION_FACE;
+	else if (bulletHeight > clientHeight - 10)
+		targ->player->lasthurt_location |= LOCATION_SHOULDER;
+	else if (bulletHeight > clientHeight - 16)
+		targ->player->lasthurt_location |= LOCATION_CHEST;
+	else if (bulletHeight > clientHeight - 26)
+		targ->player->lasthurt_location |= LOCATION_STOMACH;
+	else if (bulletHeight > clientHeight - 29)
+		targ->player->lasthurt_location |= LOCATION_GROIN;
+	else if (bulletHeight < 4)
+		targ->player->lasthurt_location |= LOCATION_FOOT;
+	else
+		// The leg is the only thing that changes size when you duck,
+		// so we check for every other parts RELATIVE location, and
+		// whats left over must be the leg. 
+		targ->player->lasthurt_location |= LOCATION_LEG; 
 
 	return G_WeaponDamageModifier(targ->player->lasthurt_location, take, attacker->player->ps.weapon);
 }
