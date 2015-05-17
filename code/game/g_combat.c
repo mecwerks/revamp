@@ -868,33 +868,86 @@ int G_InvulnerabilityEffect( gentity_t *targ, vec3_t dir, vec3_t point, vec3_t i
 
 typedef struct {
 	int weapon;
-	int damageMod[6];
+	float damageMod[6];
 } weaponDamageMod_t;
 
 weaponDamageMod_t weaponMods[WP_NUM_WEAPONS] = {
-	{ WP_NONE, 				{ 0, 0, 0, 0, 0, 0 } },
+	{ WP_NONE,
+		// head, neak, arms, chest, belly, legs
+		{0, 0, 0, 0, 0, 0} },
 
-	{ WP_GAUNTLET, 			{ 1, 1, 1, 1, 1, 1 } },
-	{ WP_MACHINEGUN, 		{ 1, 1, 1, 1, 1, 1 } },
-	{ WP_SHOTGUN, 			{ 1, 1, 1, 1, 1, 1 } },
-	{ WP_GRENADE_LAUNCHER, 	{ 1, 1, 1, 1, 1, 1 } },
-	{ WP_ROCKET_LAUNCHER, 	{ 1, 1, 1, 1, 1, 1 } },
-	{ WP_LIGHTNING, 		{ 1, 1, 1, 1, 1, 1 } },
-	{ WP_RAILGUN, 			{ 1, 1, 1, 1, 1, 1 } },
-	{ WP_PLASMAGUN, 		{ 1, 1, 1, 1, 1, 1 } },
-	{ WP_BFG, 				{ 1, 1, 1, 1, 1, 1 } },
-	{ WP_GRAPPLING_HOOK, 	{ 0, 0, 0, 0, 0, 0 } }
+	{ WP_GAUNTLET,
+		{2, 1.5, 1, 1.3, 1.3, 1} },
+
+	{ WP_MACHINEGUN,
+		{1.5, 1.3, 1, 1.1, 1.1, 1} },
+
+	{ WP_SHOTGUN,
+		{1.3, 1.2, 1.1, 1.1, 1.1, 1} },
+	
+	{ WP_GRENADE_LAUNCHER,
+		{1.4, 1.4, 1.2, 1.3, 1.4, 1.2} },
+
+	{ WP_ROCKET_LAUNCHER,
+		{1.4, 1.4, 1.2, 1.3, 1.3, 1.2} },
+
+	{ WP_LIGHTNING,
+		{1.4, 1.3, 1.3, 1.3, 1.3, 1.2} },
+
+	{ WP_RAILGUN,
+		{1.5, 1.2, 1, 1.1, 1.1, 1} },
+
+	{ WP_PLASMAGUN,
+		{1.3, 1.2, 1.2, 1.2, 1.2, 1} },
+
+	{ WP_BFG,
+		{1.1, 1.1, 1, 1.1, 1.1, 1} },
+
+	{ WP_GRAPPLING_HOOK,
+		{0, 0, 0, 0, 0, 0} }
 };
 
-// head, neak, arms, chest, belly, legs
-
+/*
+============
+G_LocationString
+============
+*/
+char *G_LocationString(int location) {
+	// Check the location ignoring the rotation info
+	switch (location &  ~(LOCATION_BACK | LOCATION_LEFT | LOCATION_RIGHT | LOCATION_FRONT)) {
+		case LOCATION_HEAD:
+		case LOCATION_FACE:
+			return "Head";
+		case LOCATION_SHOULDER:
+			if (location & (LOCATION_FRONT | LOCATION_BACK))
+				return "Neck";
+			else
+				return "Shoulders";
+		case LOCATION_CHEST:
+			if (location & (LOCATION_FRONT | LOCATION_BACK))
+				return "Chest";
+			else
+				return "Arms";
+		case LOCATION_STOMACH:
+			return "Belly";
+		case LOCATION_GROIN:
+			return "Groin";
+		case LOCATION_LEG:
+			return "Leg";
+		case LOCATION_FOOT:
+			return "Foot";
+		default:
+			return "NONE";
+	}
+}
 /*
 ============
 G_WeaponDamageModifier
 ============
 */
-int G_WeaponDamageModifier(int location, int take, int weapon) {
+int G_WeaponDamageModifier(int location, int otake, int weapon) {
 	int i;
+	float take = otake;
 	weaponDamageMod_t *wpMod = NULL;
 
 	for (i = WP_NONE+1; i < WP_NUM_WEAPONS; i++) {
@@ -920,12 +973,12 @@ int G_WeaponDamageModifier(int location, int take, int weapon) {
 			break;
 		case LOCATION_CHEST:
 			if (location & (LOCATION_FRONT | LOCATION_BACK))
-				take *= wpMod->damageMod[4]; // Belly or back
+				take *= wpMod->damageMod[3]; // chest
 			else
 				take *= wpMod->damageMod[2]; // Arms
 			break;
 		case LOCATION_STOMACH:
-			take *= wpMod->damageMod[3]; // belly
+			take *= wpMod->damageMod[4]; // belly
 			break;
 		case LOCATION_GROIN:
 			// if (targ->player->lasthurt_location & LOCATION_FRONT)
@@ -940,7 +993,7 @@ int G_WeaponDamageModifier(int location, int take, int weapon) {
 			break;
 	}
 
-	return take;
+	return (int)ceil(take);
 }
 
 /* 
@@ -1231,11 +1284,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ((targ == attacker) && !g_selfDamage.integer)
 		take = 0;
 	
-	if ( g_debugDamage.integer ) {
-		G_Printf( "%i: player:%i health:%i damage:%i armor:%i\n", level.time, targ->s.number,
-			targ->health, take, asave );
-	}
-
 	// add to the damage inflicted on a player this frame
 	// the total will be turned into screen blends and view angle kicks
 	// at the end of the frame
@@ -1277,6 +1325,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			targ->player->lasthurt_location = LOCATION_NONE;
 	}
 
+	if ( g_debugDamage.integer ) {
+		G_Printf( "%i: player:%i health:%i damage:%i armor:%i location: %s\n", level.time, targ->s.number,
+			targ->health, take, asave, G_LocationString(targ->player->lasthurt_location) );
+	}
+
 	// do the damage
 	if (take) {
 		targ->health = targ->health - take;
@@ -1298,7 +1351,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			targ->pain (targ, attacker, take);
 		}
 	}
-
 }
 
 

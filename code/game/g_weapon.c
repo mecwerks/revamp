@@ -144,8 +144,8 @@ MACHINEGUN
 #define CHAINGUN_DAMAGE		7
 #endif
 #define MACHINEGUN_SPREAD	200
-#define	MACHINEGUN_DAMAGE	7
-#define	MACHINEGUN_TEAM_DAMAGE	5		// wimpier MG in teamplay
+#define	MACHINEGUN_DAMAGE	8
+#define	MACHINEGUN_TEAM_DAMAGE	8
 
 void Bullet_Fire (gentity_t *ent, float spread, int damage, int mod ) {
 	trace_t		tr;
@@ -258,7 +258,7 @@ SHOTGUN
 
 // DEFAULT_SHOTGUN_SPREAD and DEFAULT_SHOTGUN_COUNT	are in bg_public.h, because
 // client predicts same spreads
-#define	DEFAULT_SHOTGUN_DAMAGE	10
+#define	DEFAULT_SHOTGUN_DAMAGE	8
 
 qboolean ShotgunPellet( vec3_t start, vec3_t end, gentity_t *ent ) {
 	trace_t		tr;
