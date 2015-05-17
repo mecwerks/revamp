@@ -880,28 +880,28 @@ weaponDamageMod_t weaponMods[WP_NUM_WEAPONS] = {
 		{1, 1, 1} },
 
 	{ WP_MACHINEGUN,
-		{1, 1, 1} },
+		{1.2, 1.1, 1} },
 
 	{ WP_SHOTGUN,
-		{1, 1, 1} },
+		{1.1, 1, 1} },
 	
 	{ WP_GRENADE_LAUNCHER,
-		{1, 1, 1} },
+		{1.2, 1.2, 1.1} },
 
 	{ WP_ROCKET_LAUNCHER,
-		{1, 1, 1} },
+		{1.2, 1.2, 1.2} },
 
 	{ WP_LIGHTNING,
-		{1, 1, 1} },
+		{1.1, 1, 1} },
 
 	{ WP_RAILGUN,
-		{1, 1, 1} },
+		{1.5, 1, 0.9} },
 
 	{ WP_PLASMAGUN,
-		{1, 1, 1} },
+		{1.1, 1, 1} },
 
 	{ WP_BFG,
-		{1, 1, 1} },
+		{1.2, 1.1, 1} },
 
 	{ WP_GRAPPLING_HOOK,
 		{0, 0, 0} }
@@ -918,24 +918,29 @@ char *G_LocationString(int location) {
 		case LOCATION_HEAD:
 		case LOCATION_FACE:
 			return "Head";
+		
 		case LOCATION_SHOULDER:
 			if (location & (LOCATION_FRONT | LOCATION_BACK))
 				return "Neck";
-			else
-				return "Shoulders";
+			else return "Shoulders";
+
 		case LOCATION_CHEST:
 			if (location & (LOCATION_FRONT | LOCATION_BACK))
 				return "Chest";
-			else
-				return "Arms";
+			else return "Arms";
+		
 		case LOCATION_STOMACH:
 			return "Belly";
+		
 		case LOCATION_GROIN:
 			return "Groin";
+		
 		case LOCATION_LEG:
 			return "Leg";
+		
 		case LOCATION_FOOT:
 			return "Foot";
+		
 		default:
 			return "NONE";
 	}
@@ -965,11 +970,13 @@ int G_WeaponDamageModifier(int location, int otake, int weapon) {
 		case LOCATION_FACE:
 			take *= wpMod->damageMod[0]; // head
 			break;
+		
 		case LOCATION_SHOULDER:
 		case LOCATION_CHEST:
 		case LOCATION_STOMACH:
 			take *= wpMod->damageMod[1]; // torso
 			break;
+		
 		case LOCATION_GROIN:
 		case LOCATION_LEG:
 		case LOCATION_FOOT:
