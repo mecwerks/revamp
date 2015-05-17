@@ -2517,6 +2517,7 @@ void CG_Player( centity_t *cent ) {
 	vec3_t			shadowOrigin;
 	float			shadowAlpha;
 	float			bodySinkOffset;
+	qboolean		headless = qfalse;
 #ifdef MISSIONPACK
 	refEntity_t		skull;
 	refEntity_t		powerup;
@@ -2544,6 +2545,9 @@ void CG_Player( centity_t *cent ) {
 	if ( cg_blood.integer && cg_gibs.integer && ( cent->currentState.eFlags & EF_GIBBED ) ) {
 		return;
 	}
+
+	if ( cent->currentState.eFlags & EF_GIBBED_HEADSHOT )
+		headless = qtrue;
 
 	// get the player model information
 	renderfx = 0;
@@ -2857,25 +2861,27 @@ void CG_Player( centity_t *cent ) {
 	//
 	// add the head
 	//
-	head.hModel = pi->headModel;
-	if (!head.hModel) {
-		return;
+	if ( !headless ) {
+		head.hModel = pi->headModel;
+		if (!head.hModel) {
+			return;
+		}
+		head.customSkin = legs.customSkin;
+
+		VectorCopy( cent->lerpOrigin, head.lightingOrigin );
+
+		CG_PositionRotatedEntityOnTag( &head, &torso, pi->torsoModel, "tag_head");
+
+		head.shadowPlane = shadowPlane;
+		head.renderfx = renderfx;
+
+		CG_AddRefEntityWithPowerups( &head, &cent->currentState );
+
+		CG_AddBreathPuffs( cent, &head );
 	}
-	head.customSkin = legs.customSkin;
-
-	VectorCopy( cent->lerpOrigin, head.lightingOrigin );
-
-	CG_PositionRotatedEntityOnTag( &head, &torso, pi->torsoModel, "tag_head");
-
-	head.shadowPlane = shadowPlane;
-	head.renderfx = renderfx;
-
-	CG_AddRefEntityWithPowerups( &head, &cent->currentState );
-
-	CG_AddBreathPuffs( cent, &head );
 
 #ifdef MISSIONPACK
-	CG_DustTrail(cent);
+		CG_DustTrail(cent);
 #endif
 
 	//
@@ -2920,7 +2926,8 @@ void CG_ResetPlayerEntity( centity_t *cent ) {
 	cent->pe.torso.yawing = qfalse;
 	cent->pe.torso.pitchAngle = cent->rawAngles[PITCH];
 	cent->pe.torso.pitching = qfalse;
-
+	cent->pe.headless = qfalse;
+	
 	if ( cg_debugPosition.integer ) {
 		CG_Printf("%i ResetPlayerEntity yaw=%f\n", cent->currentState.number, cent->pe.torso.yawAngle );
 	}

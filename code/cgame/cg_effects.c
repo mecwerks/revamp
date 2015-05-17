@@ -653,7 +653,7 @@ Generated a bunch of gibs launching out from the bodies location
 */
 #define	GIB_VELOCITY	250
 #define	GIB_JUMP		250
-void CG_GibPlayer( vec3_t playerOrigin ) {
+void CG_GibPlayer( vec3_t playerOrigin, qboolean headshot ) {
 	vec3_t	origin, velocity;
 
 	if ( CG_PointContents( playerOrigin, -1 ) & ( CONTENTS_WATER | CONTENTS_SLIME | CONTENTS_LAVA ) ) {
@@ -665,6 +665,10 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
 	}
 
 	VectorCopy( playerOrigin, origin );
+
+	if (headshot)
+		origin[2] += 25;
+	
 	velocity[0] = crandom()*GIB_VELOCITY;
 	velocity[1] = crandom()*GIB_VELOCITY;
 	velocity[2] = GIB_JUMP + crandom()*GIB_VELOCITY;
@@ -674,6 +678,9 @@ void CG_GibPlayer( vec3_t playerOrigin ) {
 		CG_LaunchGib( origin, velocity, cgs.media.gibBrain );
 	}
 
+	if (headshot)
+		return;
+	
 	VectorCopy( playerOrigin, origin );
 	velocity[0] = crandom()*GIB_VELOCITY;
 	velocity[1] = crandom()*GIB_VELOCITY;

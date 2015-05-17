@@ -1149,6 +1149,7 @@ void PlayerSpawn(gentity_t *ent) {
 	ent->waterlevel = 0;
 	ent->watertype = 0;
 	ent->flags = 0;
+	ent->player->headless = qfalse;
 	
 	VectorCopy (playerMins, player->ps.mins);
 	VectorCopy (playerMaxs, player->ps.maxs);

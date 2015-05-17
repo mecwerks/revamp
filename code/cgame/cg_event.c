@@ -223,6 +223,7 @@ static void CG_Obituary( entityState_t *ent ) {
 	if ( CG_LocalPlayerState(attacker) ) {
 		char	*s;
 		playerState_t	*ps;
+		char *extra = "";
 
 		for (i = 0; i < CG_MaxSplitView(); i++) {
 			if ( attacker != cg.snap->pss[i].playerNum ) {
@@ -232,11 +233,14 @@ static void CG_Obituary( entityState_t *ent ) {
 			ps = &cg.snap->pss[i];
 
 			if ( cgs.gametype < GT_TEAM ) {
-				s = va("You fragged %s\n%s place with %i", targetName, 
+				if ( mod == MOD_HEADSHOT )
+					extra = "Headshot!\n";
+
+				s = va("%sYou fragged %s\n%s place with %i", extra, targetName, 
 					CG_PlaceString( ps->persistant[PERS_RANK] + 1 ),
 					ps->persistant[PERS_SCORE] );
 			} else {
-				s = va("You fragged %s", targetName );
+				s = va("%sYou fragged %s", extra, targetName );
 			}
 #ifdef MISSIONPACK
 			if (!(cg_singlePlayer.integer && cg_cameraOrbit.integer)) {
@@ -313,6 +317,10 @@ static void CG_Obituary( entityState_t *ent ) {
 		case MOD_BFG_SPLASH:
 			message = "was blasted by";
 			message2 = "'s BFG";
+			break;
+		case MOD_HEADSHOT:
+			message = "headbutted";
+			message2 = "'s bullet";
 			break;
 #ifdef MISSIONPACK
 		case MOD_NAIL:
@@ -1226,8 +1234,9 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		// check if gibbed
 		// eventParm 1 = living player gibbed
 		// eventParm 2 = corpse gibbed
+		// eventParm 3 = living person gib headshot
 		if ( es->eventParm >= 1 ) {
-			CG_GibPlayer( cent->lerpOrigin );
+			CG_GibPlayer( cent->lerpOrigin, (es->eventParm == 3) ? qtrue : qfalse );
 
 			if ( cg_blood.integer && cg_gibs.integer ) {
 				// don't play gib sound when using the kamikaze because it interferes

@@ -310,9 +310,10 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker ) 
 GibEntity
 ==================
 */
-void GibEntity( gentity_t *self ) {
+void GibEntity( gentity_t *self, qboolean headshot ) {
 	gentity_t *ent;
 	int i;
+	int flag;
 
 	//if this entity still has kamikaze
 	if (self->s.eFlags & EF_KAMIKAZE) {
@@ -334,12 +335,21 @@ void GibEntity( gentity_t *self ) {
 			break;
 		}
 	}
-	self->takedamage = qfalse;
-	self->s.eFlags |= EF_GIBBED;
+
+	if (headshot) {
+		flag = EF_GIBBED_HEADSHOT;
+		self->player->headless = qtrue;
+	} else {
+		flag = EF_GIBBED;
+		self->player->headless = qfalse;
+		self->takedamage = qfalse;
+	}
+
+	self->s.eFlags |= flag;
 	self->s.contents = 0;
 
 	if (self->player) {
-		self->player->ps.eFlags |= EF_GIBBED;
+		self->player->ps.eFlags |= flag;
 		self->player->ps.contents = 0;
 	}
 }
@@ -354,7 +364,7 @@ void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int d
 		return;
 	}
 
-	GibEntity( self );
+	GibEntity( self, qfalse );
 
 	// add corpse gibbed event
 	G_AddEvent( self, EV_DEATH1, 2 );
@@ -377,6 +387,7 @@ char	*modNames[] = {
 	"MOD_LIGHTNING",
 	"MOD_BFG",
 	"MOD_BFG_SPLASH",
+	"MOD_HEADSHOT",
 	"MOD_WATER",
 	"MOD_SLIME",
 	"MOD_LAVA",
@@ -710,10 +721,13 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	if ( gibPlayer ) {
 		// gib death
-		GibEntity( self );
+		GibEntity( self, qfalse );
 
 		// do normal death for clients with gibs disable
 	} else {
+		if (meansOfDeath == MOD_HEADSHOT)
+			gibPlayer = 3;
+
 		// the body can still be gibbed
 		self->die = body_die;
 
@@ -744,6 +758,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		( ( self->player->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
 
 	G_AddEvent( self, EV_DEATH1 + rndAnim, gibPlayer );
+
+	if ( meansOfDeath == MOD_HEADSHOT )
+		GibEntity( self, qtrue );
+	else self->player->headless = qfalse;
 
 	// globally cycle through the different death animations
 	rndAnim = ( rndAnim + 1 ) % 3;
@@ -895,7 +913,7 @@ weaponDamageMod_t weaponMods[WP_NUM_WEAPONS] = {
 		{1.1, 1, 1} },
 
 	{ WP_RAILGUN,
-		{1.5, 1, 0.9} },
+		{1.4, 1.2, 0.9} },
 
 	{ WP_PLASMAGUN,
 		{1.1, 1, 1} },
@@ -984,7 +1002,7 @@ int G_WeaponDamageModifier(int location, int otake, int weapon) {
 			break;
 	}
 
-	return (int)ceil(take);
+	return (int)take;
 }
 
 /* 
@@ -1334,6 +1352,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 			if (targ->health < -999)
 				targ->health = -999;
+
+			if (targ->player && attacker->player && ((targ->player->lasthurt_location & LOCATION_HEAD) ||
+				(targ->player->lasthurt_location & LOCATION_FACE)))
+			{
+				mod = MOD_HEADSHOT;
+			}
 
 			targ->enemy = attacker;
 			targ->die (targ, inflictor, attacker, take, mod);

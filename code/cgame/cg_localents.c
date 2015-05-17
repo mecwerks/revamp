@@ -751,7 +751,7 @@ void CG_AddInvulnerabilityJuiced( localEntity_t *le ) {
 	}
 	if ( t > 5000 ) {
 		le->endTime = 0;
-		CG_GibPlayer( le->refEntity.origin );
+		CG_GibPlayer( le->refEntity.origin, qfalse );
 	}
 	else {
 		CG_AddRefEntityWithMinLight( &le->refEntity );
