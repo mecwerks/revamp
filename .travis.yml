@@ -20,12 +20,3 @@ notifications:
   irc: "irc.freenode.org#mecwerks"
   on_success: change
   on_failure: always
-
-addons:
-  coverity_scan:
-    project:
-      name: "mecwerks/revamp"
-      description: "Build submitted via Travis CI"
-    build_command_prepend: "make clean"
-    build_command: "make release"
-    branch_pattern: master
