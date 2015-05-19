@@ -1052,6 +1052,7 @@ void PlayerSpawn(gentity_t *ent) {
 //	char	*savedAreaBits;
 	int		accuracy_hits, accuracy_shots;
 	int		eventSequence;
+	int 	startWeapon, startAmmo;
 
 	index = ent - g_entities;
 	player = ent->player;
@@ -1156,12 +1157,20 @@ void PlayerSpawn(gentity_t *ent) {
 
 	player->ps.playerNum = index;
 
-	player->ps.stats[STAT_WEAPONS] = ( 1 << WP_MACHINEGUN );
-	if ( g_gametype.integer == GT_TEAM ) {
-		player->ps.ammo[WP_MACHINEGUN] = 50;
+	if ( g_instaGib.integer == 1 ) {
+		startWeapon = WP_RAILGUN;
+		startAmmo = 50;
+	} else if ( g_instaGib.integer == 2 ) {
+		startWeapon = WP_ROCKET_LAUNCHER;
+		startAmmo = 50;
 	} else {
-		player->ps.ammo[WP_MACHINEGUN] = 100;
+		startWeapon = WP_MACHINEGUN;
+		startAmmo = 100;
 	}
+
+	player->ps.stats[STAT_WEAPONS] = ( 1 << startWeapon );
+
+	player->ps.ammo[startWeapon] = startAmmo;
 
 	player->ps.stats[STAT_WEAPONS] |= ( 1 << WP_GAUNTLET );
 	player->ps.ammo[WP_GAUNTLET] = -1;
@@ -1194,7 +1203,7 @@ void PlayerSpawn(gentity_t *ent) {
 		if (ent->player->sess.sessionTeam != TEAM_SPECTATOR) {
 			G_KillBox(ent);
 			// force the base weapon up
-			player->ps.weapon = WP_MACHINEGUN;
+			player->ps.weapon = startWeapon;
 			player->ps.weaponstate = WEAPON_READY;
 			// fire the targets of the spawn point
 			G_UseTargets(spawnPoint, ent);

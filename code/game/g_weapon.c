@@ -848,6 +848,10 @@ void FireWeapon( gentity_t *ent ) {
 	}
 #endif
 
+	if ( g_instaGib.integer ) {
+		s_quadFactor = 999;
+	}
+	
 	// track shots taken for accuracy tracking.  Grapple is not a weapon and gauntet is just not tracked
 	if( ent->s.weapon != WP_GRAPPLING_HOOK && ent->s.weapon != WP_GAUNTLET ) {
 #ifdef MISSIONPACK

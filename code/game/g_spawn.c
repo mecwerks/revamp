@@ -308,6 +308,14 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 		return qfalse;
 	}
 
+	if (g_instaGib.integer) {
+		if (!Q_strncmp(ent->classname, "weapon_", 7)) {
+			ent->classname = (g_instaGib.integer == 1) ? "weapon_railgun" : "weapon_rocketlauncher";
+		} else if (!Q_strncmp(ent->classname, "ammo_", 5)) {
+			ent->classname = (g_instaGib.integer == 1) ? "ammo_slugs" : "ammo_rockets";
+		}
+	}
+	
 	// check item spawn functions
 	for ( i = 1; i < BG_NumItems(); i++ ) {
 		item = BG_ItemForItemNum( i );

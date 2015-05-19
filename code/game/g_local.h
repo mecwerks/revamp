@@ -835,3 +835,4 @@ extern  vmCvar_t	g_fallDamage;
 extern	vmCvar_t	g_footSteps;
 extern	vmCvar_t	g_fixedFOV;
 extern 	vmCvar_t	g_weaponMods;
+extern 	vmCvar_t	g_instaGib;

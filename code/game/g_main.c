@@ -122,6 +122,7 @@ vmCvar_t	g_fallDamage;
 vmCvar_t	g_footSteps;
 vmCvar_t	g_fixedFOV;
 vmCvar_t	g_weaponMods;
+vmCvar_t	g_instaGib;
 
 static cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -210,7 +211,8 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_fallDamage, "g_fallDamage", "1", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
 	{ &g_footSteps, "g_footSteps", "1", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
 	{ &g_fixedFOV, "g_fixedFOV", "0", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
-	{ &g_weaponMods, "g_weaponMods", "1", CVAR_ARCHIVE | CVAR_LATCH, GCF_TRACK_CHANGE, RANGE_BOOL }
+	{ &g_weaponMods, "g_weaponMods", "1", CVAR_LATCH, GCF_TRACK_CHANGE, RANGE_BOOL },
+	{ &g_instaGib, "g_instaGib", "0", CVAR_LATCH, GCF_TRACK_CHANGE, RANGE_ALL }
 
 };
 
