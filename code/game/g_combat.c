@@ -986,19 +986,22 @@ int G_WeaponDamageModifier(int location, int otake, int weapon) {
 	switch (location &  ~(LOCATION_BACK | LOCATION_LEFT | LOCATION_RIGHT | LOCATION_FRONT)) {
 		case LOCATION_HEAD:
 		case LOCATION_FACE:
-			take *= wpMod->damageMod[0]; // head
+			if ( g_instaGib.integer ) take = 130;
+			else take *= wpMod->damageMod[0]; // head
 			break;
 		
 		case LOCATION_SHOULDER:
 		case LOCATION_CHEST:
 		case LOCATION_STOMACH:
-			take *= wpMod->damageMod[1]; // torso
+			if ( g_instaGib.integer ) take = 999;
+			else take *= wpMod->damageMod[1]; // torso
 			break;
 		
 		case LOCATION_GROIN:
 		case LOCATION_LEG:
 		case LOCATION_FOOT:
-			take *= wpMod->damageMod[2]; // legs
+			if ( g_instaGib.integer ) take = 999;
+			else take *= wpMod->damageMod[2]; // legs
 			break;
 	}
 
@@ -1112,7 +1115,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			   vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	gplayer_t	*player;
 	int			take;
-	int			asave;
+	int			asave = 0;
 	int			knockback;
 	int			max;
 #ifdef MISSIONPACK
@@ -1286,9 +1289,18 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 	take = damage;
 
+	if (targ->player) {
+		if (point && targ && targ->health && attacker && take)
+			take = G_LocationDamage(point, targ, attacker, take);
+		else 
+			targ->player->lasthurt_location = LOCATION_NONE;
+	}
+
 	// save some from armor
-	asave = CheckArmor (targ, take, dflags);
-	take -= asave;
+	if ( !g_instaGib.integer ) {
+		asave = CheckArmor (targ, take, dflags);
+		take -= asave;
+	}
 
 	if ((targ == attacker) && !g_selfDamage.integer)
 		take = 0;
@@ -1327,11 +1339,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		// set the last player who damaged the target
 		targ->player->lasthurt_player = attacker->s.number;
 		targ->player->lasthurt_mod = mod;
-
-		if (point && targ && targ->health && attacker && take)
-			take = G_LocationDamage(point, targ, attacker, take);
-		else
-			targ->player->lasthurt_location = LOCATION_NONE;
 	}
 
 	if ( g_debugDamage.integer ) {
