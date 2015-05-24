@@ -313,7 +313,6 @@ GibEntity
 void GibEntity( gentity_t *self, qboolean headshot ) {
 	gentity_t *ent;
 	int i;
-	int flag;
 
 	//if this entity still has kamikaze
 	if (self->s.eFlags & EF_KAMIKAZE) {
@@ -337,21 +336,23 @@ void GibEntity( gentity_t *self, qboolean headshot ) {
 	}
 
 	if (headshot) {
-		flag = EF_GIBBED_HEADSHOT;
+		self->s.eFlags |= EF_GIBBED_HEADSHOT;
+
+		if (self->player)
+			self->player->ps.eFlags |= EF_GIBBED_HEADSHOT;
+
 		self->player->headless = qtrue;
 		self->takedamage = qtrue;
 	} else {
-		flag = EF_GIBBED;
+		self->s.eFlags |= EF_GIBBED;
+		self->s.contents = 0;
+
+		if (self->player) {
+			self->player->ps.eFlags |= EF_GIBBED;
+			self->player->ps.contents = 0;
+		}
 		self->player->headless = qfalse;
 		self->takedamage = qfalse;
-	}
-
-	self->s.eFlags |= flag;
-	self->s.contents = 0;
-
-	if (self->player) {
-		self->player->ps.eFlags |= flag;
-		self->player->ps.contents = 0;
 	}
 }
 
