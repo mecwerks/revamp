@@ -423,6 +423,7 @@ void CopyToBodyQue( gentity_t *ent ) {
 
 	body->s = ent->s;
 	body->s.eFlags = EF_DEAD;		// clear EF_TALK, etc
+	
 #ifdef MISSIONPACK
 	if ( ent->s.eFlags & EF_KAMIKAZE ) {
 		body->s.eFlags |= EF_KAMIKAZE;
@@ -487,6 +488,9 @@ void CopyToBodyQue( gentity_t *ent ) {
 	body->think = BodyQueFree;
 
 	body->die = body_die;
+
+	if ( ent->s.eFlags & EF_GIBBED_HEADSHOT )
+		body->s.eFlags |= EF_GIBBED_HEADSHOT;
 
 	// don't take more damage if already gibbed
 	if ( ent->health <= GIB_HEALTH ) {

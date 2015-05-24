@@ -579,7 +579,8 @@ typedef enum {
 #define EF_AWARD_DENIED		0x00040000		// denied
 #define EF_TEAMVOTED		0x00080000		// already cast a team vote
 #define EF_GIBBED			0x00100000		// player has been gibbed, client only renders player if com_blood or cg_gibs is 0
-#define EF_GIBBED_HEADSHOT	0x00200000
+#define EF_GIBBED_HEADSHOT	0x00200000		// gibbed headshot
+#define EF_HEADSHOT 		0x00400000		// headshot
 
 // NOTE: may not have more than MAX_POWERUPS
 typedef enum {
@@ -972,7 +973,6 @@ typedef enum {
 	MOD_LIGHTNING,
 	MOD_BFG,
 	MOD_BFG_SPLASH,
-	MOD_HEADSHOT,
 	MOD_WATER,
 	MOD_SLIME,
 	MOD_LAVA,
@@ -992,7 +992,6 @@ typedef enum {
 	MOD_GRAPPLE,
 	MOD_SUICIDE_TEAM_CHANGE
 } meansOfDeath_t;
-
 
 //---------------------------------------------------------
 

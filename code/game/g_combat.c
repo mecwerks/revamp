@@ -339,6 +339,7 @@ void GibEntity( gentity_t *self, qboolean headshot ) {
 	if (headshot) {
 		flag = EF_GIBBED_HEADSHOT;
 		self->player->headless = qtrue;
+		self->takedamage = qtrue;
 	} else {
 		flag = EF_GIBBED;
 		self->player->headless = qfalse;
@@ -387,7 +388,6 @@ char	*modNames[] = {
 	"MOD_LIGHTNING",
 	"MOD_BFG",
 	"MOD_BFG_SPLASH",
-	"MOD_HEADSHOT",
 	"MOD_WATER",
 	"MOD_SLIME",
 	"MOD_LAVA",
@@ -536,6 +536,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	int			i;
 	char		*killerName, *obit;
 	qboolean	gibPlayer;
+	qboolean	headshot = qfalse;
 
 	if ( self->player->ps.pm_type == PM_DEAD ) {
 		return;
@@ -600,6 +601,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		ent->s.otherEntityNum = self->s.number;
 		ent->s.otherEntityNum2 = killer;
 		ent->r.svFlags = SVF_BROADCAST;	// send to everyone
+		if (self->player && attacker->player && ((self->player->lasthurt_location & LOCATION_HEAD) ||
+			(self->player->lasthurt_location & LOCATION_FACE)))
+		{
+			ent->s.eFlags |= EF_HEADSHOT;
+			headshot = qtrue;
+		}
 	}
 
 	self->enemy = attacker;
@@ -725,7 +732,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 		// do normal death for clients with gibs disable
 	} else {
-		if (meansOfDeath == MOD_HEADSHOT)
+		if (headshot)
 			gibPlayer = 3;
 
 		// the body can still be gibbed
@@ -759,7 +766,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	G_AddEvent( self, EV_DEATH1 + rndAnim, gibPlayer );
 
-	if ( meansOfDeath == MOD_HEADSHOT )
+	if ( headshot )
 		GibEntity( self, qtrue );
 	else self->player->headless = qfalse;
 
@@ -1359,12 +1366,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 			if (targ->health < -999)
 				targ->health = -999;
-
-			if (targ->player && attacker->player && ((targ->player->lasthurt_location & LOCATION_HEAD) ||
-				(targ->player->lasthurt_location & LOCATION_FACE)))
-			{
-				mod = MOD_HEADSHOT;
-			}
 
 			targ->enemy = attacker;
 			targ->die (targ, inflictor, attacker, take, mod);

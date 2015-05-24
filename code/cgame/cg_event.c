@@ -92,6 +92,7 @@ static void CG_Obituary( entityState_t *ent ) {
 	int			target, attacker;
 	char		*message;
 	char		*message2;
+	char 		*message3;
 	const char	*targetInfo;
 	const char	*attackerInfo;
 	char		targetName[32];
@@ -223,7 +224,6 @@ static void CG_Obituary( entityState_t *ent ) {
 	if ( CG_LocalPlayerState(attacker) ) {
 		char	*s;
 		playerState_t	*ps;
-		char *extra = "";
 
 		for (i = 0; i < CG_MaxSplitView(); i++) {
 			if ( attacker != cg.snap->pss[i].playerNum ) {
@@ -233,14 +233,11 @@ static void CG_Obituary( entityState_t *ent ) {
 			ps = &cg.snap->pss[i];
 
 			if ( cgs.gametype < GT_TEAM ) {
-				if ( mod == MOD_HEADSHOT )
-					extra = "Headshot!\n";
-
-				s = va("%sYou fragged %s\n%s place with %i", extra, targetName, 
+				s = va("You fragged %s\n%s place with %i", targetName, 
 					CG_PlaceString( ps->persistant[PERS_RANK] + 1 ),
 					ps->persistant[PERS_SCORE] );
 			} else {
-				s = va("%sYou fragged %s", extra, targetName );
+				s = va("You fragged %s", targetName );
 			}
 #ifdef MISSIONPACK
 			if (!(cg_singlePlayer.integer && cg_cameraOrbit.integer)) {
@@ -270,90 +267,68 @@ static void CG_Obituary( entityState_t *ent ) {
 	}
 
 	if ( attacker != ENTITYNUM_WORLD ) {
+		message2 = "couldn't dodge";
+		message3 = "was hit in the head by";
+
 		switch (mod) {
 		case MOD_GRAPPLE:
-			message = "was caught by";
+			message = "grapple hook";
 			break;
 		case MOD_GAUNTLET:
-			message = "was pummeled by";
+			message = "gauntlet";
+			message2 = "was pummeled by";
 			break;
 		case MOD_MACHINEGUN:
-			message = "was machinegunned by";
+			message = "machinegun";
 			break;
 		case MOD_SHOTGUN:
-			message = "was gunned down by";
+			message = "shotgun";
 			break;
 		case MOD_GRENADE:
-			message = "ate";
-			message2 = "'s grenade";
+			message = "grenade launcher";
+			message2 = "ate";
 			break;
 		case MOD_GRENADE_SPLASH:
-			message = "was shredded by";
-			message2 = "'s shrapnel";
+			message = "shrapnel";
+			message2 = "was shredded by";
 			break;
 		case MOD_ROCKET:
-			message = "ate";
-			message2 = "'s rocket";
+			message = "rocket launcher";
+			message2 = "was blasted by";
 			break;
 		case MOD_ROCKET_SPLASH:
-			message = "almost dodged";
-			message2 = "'s rocket";
+			message = "rocket";
+			message2 = "almost dodged";
 			break;
 		case MOD_PLASMA:
-			message = "was melted by";
-			message2 = "'s plasmagun";
-			break;
 		case MOD_PLASMA_SPLASH:
-			message = "was melted by";
-			message2 = "'s plasmagun";
+			message = "plasmagun";
+			message2 = "was melted by";
 			break;
 		case MOD_RAILGUN:
-			message = "was railed by";
+			message = "railgun";
 			break;
 		case MOD_LIGHTNING:
-			message = "was electrocuted by";
+			message = "lightning gun";
+			message2 = "was fried by";
 			break;
 		case MOD_BFG:
 		case MOD_BFG_SPLASH:
-			message = "was blasted by";
-			message2 = "'s BFG";
+			message = "BFG";
+			message2 = "was blasted by";
 			break;
-		case MOD_HEADSHOT:
-			message = "headbutted";
-			message2 = "'s bullet";
-			break;
-#ifdef MISSIONPACK
-		case MOD_NAIL:
-			message = "was nailed by";
-			break;
-		case MOD_CHAINGUN:
-			message = "got lead poisoning from";
-			message2 = "'s Chaingun";
-			break;
-		case MOD_PROXIMITY_MINE:
-			message = "was too close to";
-			message2 = "'s Prox Mine";
-			break;
-		case MOD_KAMIKAZE:
-			message = "falls to";
-			message2 = "'s Kamikaze blast";
-			break;
-		case MOD_JUICED:
-			message = "was juiced by";
-			break;
-#endif
 		case MOD_TELEFRAG:
-			message = "tried to invade";
-			message2 = "'s personal space";
+			message = "way";
+			message2 = "got in";
 			break;
 		default:
-			message = "was killed by";
+			message = "gun";
+			message2 = "was killed by";
 			break;
 		}
 
 		if (message) {
-			CG_Printf( "%s %s %s%s\n", 
-				targetName, message, attackerName, message2);
+			CG_Printf( "%s %s %s's %s\n", targetName, (ent->eFlags & EF_HEADSHOT) ? message3 : message2, attackerName, message);
 			return;
 		}
 	}
