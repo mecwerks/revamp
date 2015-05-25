@@ -49,6 +49,8 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define	INTERMISSION_DELAY_TIME	1000
 #define	SP_INTERMISSION_DELAY_TIME	5000
 
+#define ASSISTED_SUICIDE_TIME	4000 // msec
+
 // gentity->flags
 #define	FL_GODMODE				0x00000010
 #define	FL_NOTARGET				0x00000020
@@ -349,6 +351,8 @@ struct gplayer_s {
 	int			lasthurt_player;	// last player that damaged this player
 	int			lasthurt_mod;		// type of damage the player did
 	int 		lasthurt_location;	// location of the hit
+	int 		lasthurt_time;		// time of last hurt
+	int 		lasthurt_player2;	//
 
 	qboolean	headless;			// Mecwerks: headless
 	

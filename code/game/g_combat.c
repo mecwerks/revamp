@@ -396,6 +396,7 @@ char	*modNames[] = {
 	"MOD_TELEFRAG",
 	"MOD_FALLING",
 	"MOD_SUICIDE",
+	"MOD_ASSISTED_SUICIDE",
 	"MOD_TARGET_LASER",
 	"MOD_TRIGGER_HURT",
 #ifdef MISSIONPACK
@@ -594,22 +595,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		killer, self->s.number, meansOfDeath, killerName, 
 		self->player->pers.netname, obit );
 
-	// don't send death obituary when swiching teams
-	if (meansOfDeath != MOD_SUICIDE_TEAM_CHANGE) {
-		// broadcast the death event to everyone
-		ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
-		ent->s.eventParm = meansOfDeath;
-		ent->s.otherEntityNum = self->s.number;
-		ent->s.otherEntityNum2 = killer;
-		ent->r.svFlags = SVF_BROADCAST;	// send to everyone
-		if (self->player && attacker->player && ((self->player->lasthurt_location & LOCATION_HEAD) ||
-			(self->player->lasthurt_location & LOCATION_FACE)))
-		{
-			ent->s.eFlags |= EF_HEADSHOT;
-			headshot = qtrue;
-		}
-	}
-
 	self->enemy = attacker;
 
 	self->player->ps.persistant[PERS_KILLED]++;
@@ -618,7 +603,12 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		attacker->player->lastkilled_player = self->s.number;
 
 		if ( attacker == self || OnSameTeam (self, attacker ) ) {
-			AddScore( attacker, self->r.currentOrigin, -1 );
+			if ( ((level.time - self->player->lasthurt_time) <= ASSISTED_SUICIDE_TIME) && 
+				g_entities[self->player->lasthurt_player2].player && (self->player->lasthurt_player2 != self->s.number) ) 
+			{
+				AddScore( &g_entities[self->player->lasthurt_player2], self->r.currentOrigin, 1 );
+				meansOfDeath = MOD_ASSISTED_SUICIDE;
+			} else AddScore( attacker, self->r.currentOrigin, -1 );
 		} else {
 			AddScore( attacker, self->r.currentOrigin, 1 );
 
@@ -651,7 +641,29 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 		}
 	} else {
-		AddScore( self, self->r.currentOrigin, -1 );
+		if ( ((level.time - self->player->lasthurt_time) <= ASSISTED_SUICIDE_TIME) &&
+			g_entities[self->player->lasthurt_player2].player && (self->player->lasthurt_player2 != self->s.number) ) 
+		{
+			AddScore( &g_entities[self->player->lasthurt_player2], self->r.currentOrigin, 1 );
+			meansOfDeath = MOD_ASSISTED_SUICIDE;
+		} else AddScore( self, self->r.currentOrigin, -1 );
+	}
+
+	// don't send death obituary when swiching teams
+	// allow mod to be changed by death type
+	if (meansOfDeath != MOD_SUICIDE_TEAM_CHANGE) {
+		// broadcast the death event to everyone
+		ent = G_TempEntity( self->r.currentOrigin, EV_OBITUARY );
+		ent->s.eventParm = meansOfDeath;
+		ent->s.otherEntityNum = self->s.number;
+		ent->s.otherEntityNum2 = killer;
+		ent->r.svFlags = SVF_BROADCAST;	// send to everyone
+		if (self->player && attacker->player && ((self->player->lasthurt_location & LOCATION_HEAD) ||
+			(self->player->lasthurt_location & LOCATION_FACE)))
+		{
+			ent->s.eFlags |= EF_HEADSHOT;
+			headshot = qtrue;
+		}
 	}
 
 	// Add team bonuses
@@ -1347,6 +1359,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		// set the last player who damaged the target
 		targ->player->lasthurt_player = attacker->s.number;
 		targ->player->lasthurt_mod = mod;
+
+		if ( attacker->player ) {
+			targ->player->lasthurt_player2 = attacker->s.number;
+			targ->player->lasthurt_time = level.time;
+		}
 	}
 
 	if ( g_debugDamage.integer ) {

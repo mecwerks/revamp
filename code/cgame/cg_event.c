@@ -132,6 +132,9 @@ static void CG_Obituary( entityState_t *ent ) {
 	case MOD_SUICIDE:
 		message = "suicides";
 		break;
+	case MOD_ASSISTED_SUICIDE:
+		message = "was aided in death";
+		break;
 	case MOD_FALLING:
 		message = "cratered";
 		break;
@@ -272,44 +275,44 @@ static void CG_Obituary( entityState_t *ent ) {
 
 		switch (mod) {
 		case MOD_GRAPPLE:
-			message = "grapple hook";
+			message = "Grappling Hook";
 			break;
 		case MOD_GAUNTLET:
-			message = "gauntlet";
+			message = "Gauntlet";
 			message2 = "was pummeled by";
 			break;
 		case MOD_MACHINEGUN:
-			message = "machinegun";
+			message = "Machinegun";
 			break;
 		case MOD_SHOTGUN:
-			message = "shotgun";
+			message = "Shotgun";
 			break;
 		case MOD_GRENADE:
-			message = "grenade launcher";
+			message = "Grenade Launcher";
 			message2 = "ate";
 			break;
 		case MOD_GRENADE_SPLASH:
-			message = "shrapnel";
+			message = "Shrapnel";
 			message2 = "was shredded by";
 			break;
 		case MOD_ROCKET:
-			message = "rocket launcher";
+			message = "Rocket Launcher";
 			message2 = "was blasted by";
 			break;
 		case MOD_ROCKET_SPLASH:
-			message = "rocket";
+			message = "Rocket";
 			message2 = "almost dodged";
 			break;
 		case MOD_PLASMA:
 		case MOD_PLASMA_SPLASH:
-			message = "plasmagun";
+			message = "Plasmagun";
 			message2 = "was melted by";
 			break;
 		case MOD_RAILGUN:
-			message = "railgun";
+			message = "Railgun";
 			break;
 		case MOD_LIGHTNING:
-			message = "lightning gun";
+			message = "Lightning Gun";
 			message2 = "was fried by";
 			break;
 		case MOD_BFG:
