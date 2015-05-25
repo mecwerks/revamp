@@ -106,7 +106,7 @@ SOURCE_ARCHIVE=mint-arena
 endif
 
 ifndef BASEGAME
-BASEGAME=baseq3
+BASEGAME=revamp
 endif
 
 ifndef BASEGAME_CFLAGS

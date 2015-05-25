@@ -33,11 +33,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 #include "../qcommon/surfaceflags.h"
 
 #ifndef MODDIR
-  #ifdef MISSIONPACK
-    #define MODDIR "missionpack"
-  #else
-    #define MODDIR "baseq3"
-  #endif
+	#define MODDIR "revamp"
 #endif
 
 // because games can change separately from the main system version, we need a

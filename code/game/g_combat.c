@@ -1001,14 +1001,14 @@ int G_WeaponDamageModifier(int location, int otake, int weapon) {
 		case LOCATION_SHOULDER:
 		case LOCATION_CHEST:
 		case LOCATION_STOMACH:
-			if ( g_instaGib.integer ) take = 999;
+			if ( g_instaGib.integer ) take = 9999;
 			else take *= wpMod->damageMod[1]; // torso
 			break;
 		
 		case LOCATION_GROIN:
 		case LOCATION_LEG:
 		case LOCATION_FOOT:
-			if ( g_instaGib.integer ) take = 999;
+			if ( g_instaGib.integer ) take = 9999;
 			else take *= wpMod->damageMod[2]; // legs
 			break;
 	}
