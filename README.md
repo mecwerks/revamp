@@ -12,21 +12,15 @@ To use this you'll need the [Spearmint engine](https://github.com/zturtleman/spe
 * Other minor tweaks
 
 # New cvars
-* g_instaGib	- 0 Normal weapons
-		- 1 InstaGib Railgun
-		- 2 InstaGib Rocket Launcher
+* g_instaGib: 0 - Normal weapons, 1 - InstaGib Railgun, 2 - InstaGib Rocket Launcher
 
-* g_selfDamage  - 0 No self damage (rocket jumps without penalty)
-		- 1 Self damage
+* g_selfDamage: 0 - No self damage (rocket jumps without penalty), 1 - Self damage
 
-* g_fallDamage	- 0 No fall damage
-		- 1 Fall damage
+* g_fallDamag: 0 - No fall damage, 1 - Fall damage
 
-* g_weaponMods	- 0 Normal weapons
-		- 1 A few weapon mods (railgun bounces)
+* g_weaponMods: 0 - Normal weapons, 1 - A few weapon mods (railgun bounces)
 
-* g_noFootsteps - 0 Footsteps sounds
-		- 1 No footstep sounds
+* g_noFootsteps: 0 - Footsteps sounds, 1 - No footstep sounds
 
 #### Help! It errors "CGame VM uses unsupported API" when I try to run it!
 
