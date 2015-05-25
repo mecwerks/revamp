@@ -108,6 +108,8 @@ static void CG_ClearObit( int obit ) {
 		memset( &obitStack[obit], 0, sizeof(obituary_t) );
 }
 
+static qhandle_t defaultObitIcon = 0;
+
 /*
 ===================
 CG_DrawObituary
@@ -117,6 +119,9 @@ void CG_DrawObituary( void ) {
 	int i;
 	float *color;
 	float x, y;
+
+	if ( !defaultObitIcon )
+		defaultObitIcon = trap_R_RegisterShader("icons/obituary/test");
 
 	CG_SetScreenPlacement( PLACE_LEFT, PLACE_BOTTOM );
 
@@ -197,7 +202,7 @@ static void CG_AddObituary( char *attackerName, char *targetName, char *icon, qb
 	obitStack[0].icon = trap_R_RegisterShader( weapon ? icon : va("icons/obituary/%s", icon) );
 
 	if ( !obitStack[0].icon )
-		obitStack[0].icon = trap_R_RegisterShader( "icons/obituary/test" );
+		obitStack[0].icon = defaultObitIcon;
 
 	if ( attackerName )
 		Q_strncpyz( obitStack[0].attacker, attackerName, sizeof(obitStack[0].attacker) );
