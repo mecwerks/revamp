@@ -41,11 +41,13 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define OBIT_POS_X 80
 #define OBIT_POS_Y 320
 
-#define OBIT_ICON_HEIGHT 35
-#define OBIT_ICON_WIDTH 40
+#define OBIT_ICON_HEIGHT 24
+#define OBIT_ICON_WIDTH 60
 
-#define OBIT_SPACING 45
-#define OBIT_GAP_WIDTH 15
+#define OBIT_SPACING 30
+#define OBIT_GAP_WIDTH 10
+
+static int fontFlags = (UI_DROPSHADOW | UI_TINYFONT);
 
 typedef struct {
 	char	attacker[OBIT_MAX_NAME_LENGTH];
@@ -59,12 +61,24 @@ static obituary_t obitStack[OBIT_MAX_VISABLE];
 
 /*
 ===================
+CG_ClearObit
+===================
+*/
+static void CG_ClearObit( int obit ) {
+	if ( obit >= 0 && obit < OBIT_MAX_VISABLE )
+		memset( &obitStack[obit], 0, sizeof(obituary_t) );
+}
+
+/*
+===================
 CG_MoveObitInStack
 ===================
 */
 static void CG_MoveObitInStack( int obit, int move ) {
 	if ( obit + move < OBIT_MAX_VISABLE )
 		memcpy( &obitStack[obit+move], &obitStack[obit], sizeof(obituary_t) );
+
+	CG_ClearObit( obit );
 }
 
 /*
@@ -96,16 +110,6 @@ static void CG_CountObits( void ) {
 		}
 	}
 #endif
-}
-
-/*
-===================
-CG_ClearObit
-===================
-*/
-static void CG_ClearObit( int obit ) {
-	if ( obit >= 0 && obit < OBIT_MAX_VISABLE )
-		memset( &obitStack[obit], 0, sizeof(obituary_t) );
 }
 
 static qhandle_t defaultObitIcon = 0;
@@ -143,8 +147,8 @@ void CG_DrawObituary( void ) {
 		x = OBIT_POS_X;
 
 		if ( obitStack[i].attacker[0] != '\0' ) {
-			CG_DrawString( x, y, obitStack[i].attacker, UI_DROPSHADOW | UI_SMALLFONT, color );
-			x += CG_DrawStrlen( obitStack[i].attacker, UI_SMALLFONT );
+			CG_DrawString( x, y, obitStack[i].attacker, fontFlags, color );
+			x += CG_DrawStrlen( obitStack[i].attacker, fontFlags );
 			x += OBIT_GAP_WIDTH;
 		}
 
@@ -153,7 +157,7 @@ void CG_DrawObituary( void ) {
 		x += OBIT_ICON_WIDTH;
 		x += OBIT_GAP_WIDTH;
 
-		CG_DrawString( x, y, obitStack[i].target, UI_DROPSHADOW | UI_SMALLFONT, color );
+		CG_DrawString( x, y, obitStack[i].target, fontFlags, color );
 
 		trap_R_SetColor( NULL );
 	}
@@ -167,13 +171,8 @@ CG_ShiftObituaryStack
 static void CG_ShiftObituaryStack( void ) {
 	int i;
 
-	for (i = OBIT_MAX_VISABLE; i >= 0; i-- ) {
+	for (i = OBIT_MAX_VISABLE-1; i >= 0; i-- ) {
 		if ( obitStack[i].target[0] != '\0' ) {
-			if ( i == 5 ) {
-				CG_ClearObit( i );
-				continue;
-			}
-
 			CG_MoveObitInStack( i, 1 );
 		}
 	}
@@ -198,6 +197,7 @@ static void CG_AddObituary( char *attackerName, char *targetName, char *icon, qb
 	}
 
 	CG_ShiftObituaryStack();
+	CG_CountObits();
 
 	obitStack[0].icon = trap_R_RegisterShader( weapon ? icon : va("icons/obituary/%s", icon) );
 
@@ -210,8 +210,6 @@ static void CG_AddObituary( char *attackerName, char *targetName, char *icon, qb
 	Q_strncpyz( obitStack[0].target, targetName, sizeof(obitStack[0].target) );
 
 	obitStack[0].time = cg.time;
-
-	CG_CountObits();
 }
 
 typedef struct {
