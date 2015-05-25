@@ -1910,6 +1910,12 @@ extern qboolean		initparticles;
 int CG_NewParticleArea ( int num );
 
 //
+// cg_obituary.c
+//
+void CG_DrawObituary( void );
+void CG_ParseObituary( entityState_t *ent );
+
+//
 // cg_input.c
 //
 void CG_RegisterInputCvars( void );

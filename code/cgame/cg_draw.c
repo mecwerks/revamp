@@ -2889,6 +2889,8 @@ static void CG_Draw2D(stereoFrame_t stereoFrame)
 		}
 	}
 
+	CG_DrawObituary();
+
 	CG_DrawVote();
 	CG_DrawTeamVote();
 
