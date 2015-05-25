@@ -1,18 +1,32 @@
-**Spearmint Quake 3** and **Team Arena** game code.
+**Quake 3: Revamp** game code.
 
 To use this you'll need the [Spearmint engine](https://github.com/zturtleman/spearmint).
 
-  * On Windows, install MinGW.
-  * Get the source for Spearmint and build it using `make`.
-  * Get the source for this repo and build it using `make`.
-  * Copy the pak?.pk3 files for baseq3 and missionpack into the directories in `mint-arena/build/release-mingw32-x86/`.
-  * Copy the [spearmint-patch-data](https://github.com/zturtleman/spearmint-patch-data) for baseq3 and missionpack there too.
+# New Features
+* InstaGib server option
+* Assisted Suicides
+* Location Damage
+* Headshots!
+* Modified Obituary Feed
+* Server options for disabling Self-Damage and Fall-Damage
+* Other minor tweaks
 
-If you put both projects in the same directory you can launch the game using;
+# New cvars
+* g_instaGib	- 0 Normal weapons
+		- 1 InstaGib Railgun
+		- 2 InstaGib Rocket Launcher
 
-    spearmint/build/release-mingw32-x86/spearmint_x86.exe +set fs_basepath "mint-arena/build/release-mingw32-x86/" +set fs_game "baseq3"
+* g_selfDamage  - 0 No self damage (rocket jumps without penalty)
+		- 1 Self damage
 
-On Linux and OS X you'll need to put `./` before the command and substitue correct platform and architecture (look in the build directory).
+* g_fallDamage	- 0 No fall damage
+		- 1 Fall damage
+
+* g_weaponMods	- 0 Normal weapons
+		- 1 A few weapon mods (railgun bounces)
+
+* g_noFootsteps - 0 Footsteps sounds
+		- 1 No footstep sounds
 
 #### Help! It errors "CGame VM uses unsupported API" when I try to run it!
 
