@@ -357,7 +357,7 @@ void CG_ParseObituary( entityState_t *ent ) {
 				s = va("You killed %s", targetName);
 			}
 
-			CG_CenterPrint( i, s, SCREEN_HEIGHT * 0.30, 0.5 );
+			CG_CenterPrint( i, s, SCREEN_HEIGHT * 0.3, 0.35 );
 		}
 	}
 
