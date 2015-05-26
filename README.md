@@ -7,7 +7,7 @@ To use this you'll need the [Spearmint engine](https://github.com/zturtleman/spe
 * Assisted Suicides
 * Location Damage
 * Headshots!
-* Modified Obituary Feed
+* New HUD layout including new Kill Feed: [Screenshot](https://www.dropbox.com/s/1lkzdh08y7yshtj/Screenshot%20from%202015-05-26%2013%3A14%3A06.png?dl=0)
 * Server options for disabling Self-Damage and Fall-Damage
 * Other minor tweaks
 
