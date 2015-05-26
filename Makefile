@@ -1040,6 +1040,7 @@ Q3CGOBJ = \
   $(B)/$(BASEGAME)/cgame/cg_ents.o \
   $(B)/$(BASEGAME)/cgame/cg_event.o \
   $(B)/$(BASEGAME)/cgame/cg_field.o \
+  $(B)/$(BASEGAME)/cgame/cg_hud.o \
   $(B)/$(BASEGAME)/cgame/cg_info.o \
   $(B)/$(BASEGAME)/cgame/cg_input.o \
   $(B)/$(BASEGAME)/cgame/cg_localents.o \

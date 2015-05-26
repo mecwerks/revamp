@@ -36,7 +36,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 
 #define OBIT_FADE_TIME 5000
 
-#define OBIT_POS_X 40
+#define OBIT_POS_X 10
 #define OBIT_POS_Y 400
 
 #define OBIT_ICON_HEIGHT 32

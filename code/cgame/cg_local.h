@@ -1916,6 +1916,11 @@ void CG_DrawObituary( void );
 void CG_ParseObituary( entityState_t *ent );
 
 //
+// cg_hud.c
+//
+void CG_DrawHUD( void );
+
+//
 // cg_input.c
 //
 void CG_RegisterInputCvars( void );
