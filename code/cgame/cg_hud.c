@@ -144,14 +144,6 @@ void CG_DrawHUD( void ) {
         }
     }
 
-    if( cg.cur_lc->predictedPlayerState.powerups[PW_REDFLAG] ) {
-        CG_DrawStatusBarFlag( 185 + CHAR_WIDTH*3 + TEXT_ICON_SPACE + ICON_SIZE, TEAM_RED );
-    } else if( cg.cur_lc->predictedPlayerState.powerups[PW_BLUEFLAG] ) {
-        CG_DrawStatusBarFlag( 185 + CHAR_WIDTH*3 + TEXT_ICON_SPACE + ICON_SIZE, TEAM_BLUE );
-    } else if( cg.cur_lc->predictedPlayerState.powerups[PW_NEUTRALFLAG] ) {
-        CG_DrawStatusBarFlag( 185 + CHAR_WIDTH*3 + TEXT_ICON_SPACE + ICON_SIZE, TEAM_FREE );
-    }
-
     x = 625;
 
     //
@@ -174,7 +166,17 @@ void CG_DrawHUD( void ) {
         trap_R_SetColor( colors[0] );
         CG_DrawFieldEX (x - (HUD_TEXT_WIDTH*3), 463 - HUD_TEXT_HEIGHT - HUD_ICON_SIZE, 3, value, HUD_TEXT_WIDTH, HUD_TEXT_HEIGHT);
         trap_R_SetColor( NULL );
-        // if we didn't draw a 3D icon, draw a 2D icon for armor
+        x -= HUD_TEXT_WIDTH*3;
+    }
+
+    x = 635;
+    
+    if( cg.cur_lc->predictedPlayerState.powerups[PW_REDFLAG] ) {
+        CG_DrawStatusBarFlag( x - HUD_ICON_SIZE, TEAM_RED );
+    } else if( cg.cur_lc->predictedPlayerState.powerups[PW_BLUEFLAG] ) {
+        CG_DrawStatusBarFlag( x - HUD_ICON_SIZE, TEAM_BLUE );
+    } else if( cg.cur_lc->predictedPlayerState.powerups[PW_NEUTRALFLAG] ) {
+        CG_DrawStatusBarFlag( x - HUD_ICON_SIZE, TEAM_FREE );
     }
 }
 
@@ -232,4 +234,8 @@ void CG_DrawStatusBarHead( float x ) {
     angles[PITCH] = 0;
 
     CG_DrawHead( x, 480 - size, size, size, cg.cur_ps->playerNum, angles );
+}
+
+void CG_DrawStatusBarFlag( float x, int team ) {
+    CG_DrawFlagModel( x, 463 - HUD_ICON_SIZE - HUD_TEXT_HEIGHT - HUD_ICON_SIZE, HUD_ICON_SIZE, HUD_ICON_SIZE, team, qfalse );
 }
