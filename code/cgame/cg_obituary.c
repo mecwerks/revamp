@@ -45,7 +45,7 @@ static qboolean obitInit = qfalse;
 CG_RegisterModelInfo
 ===================
 */
-static modelInfo_t *CG_RegisterModelInfo( int mod, qhandle_t models[2], int barrelSpacing, vec3_t origin, vec3_t angles ) {
+static modelInfo_t *CG_RegisterModelInfo( int mod, qhandle_t models[2], vec3_t spacing, vec3_t origin, vec3_t angles ) {
 	modelInfo_t *mi;
 
 	if ( numModelInfo >= MAX_MODEL_INFO )
@@ -55,7 +55,9 @@ static modelInfo_t *CG_RegisterModelInfo( int mod, qhandle_t models[2], int barr
 	mi->mod = mod;
 	mi->handles[0] = models[0];
 	mi->handles[1] = models[1];
-	mi->barrelSpacing = barrelSpacing;
+	mi->spacing[0] = spacing[0];
+	mi->spacing[1] = spacing[1];
+	mi->spacing[2] = spacing[2];
 	mi->origin[0] = origin[0];
 	mi->origin[1] = origin[1];
 	mi->origin[2] = origin[2];
@@ -171,67 +173,83 @@ static void CG_AddObituary( char *attackerName, char *targetName, int mod ) {
 		int handles[2] = { 0, 0 };
 		vec3_t origin = { 70, 0, 0 };
 		vec3_t angles = { 0, 0, 0 };
-		int spacing = 0;
+		vec3_t spacing = { 0, 0, 0 };
 		qboolean notFound = qfalse;
 
 		switch ( mod ) {
 			case MOD_GAUNTLET:
 				handles[0] = cg_weapons[WP_GAUNTLET].weaponModel;
-				handles[0] = cg_weapons[WP_GAUNTLET].barrelModel;
-				angles[YAW] = 90;
+				handles[1] = cg_weapons[WP_GAUNTLET].barrelModel;
+				angles[YAW] = 270;
+				spacing[0] = -4;
+				spacing[1] = -14;
 				break;
 			
 			case MOD_MACHINEGUN:
 				handles[0] = cg_weapons[WP_MACHINEGUN].weaponModel;
 				handles[1] = cg_weapons[WP_MACHINEGUN].barrelModel;
-				angles[YAW] = 90;
-				spacing = 15;
+				angles[YAW] = 270;
+				spacing[0] = -1;
+				spacing[1] = 14;
+				spacing[2] = -13;
 				break;
 			
 			case MOD_SHOTGUN:
 				handles[0] = cg_weapons[WP_SHOTGUN].weaponModel;
-				angles[YAW] = 90;
+				angles[YAW] = 270;
+				spacing[0] = -6;
+				spacing[1] = 6;
 				break;
 			
 			case MOD_GRENADE:
 			case MOD_GRENADE_SPLASH:
 				handles[0] = cg_weapons[WP_GRENADE_LAUNCHER].weaponModel;
-				angles[YAW] = 90;
+				angles[YAW] = 270;
+				spacing[0] = -15;
 				break;
 			
 			case MOD_ROCKET:
 			case MOD_ROCKET_SPLASH:
 				handles[0] = cg_weapons[WP_ROCKET_LAUNCHER].weaponModel;
-				angles[YAW] = 90;
+				angles[YAW] = 270;
+				spacing[0] = -13;
+				spacing[1] = 6;
 				break;
 			
 			case MOD_LIGHTNING:
 				handles[0] = cg_weapons[WP_LIGHTNING].weaponModel;
-				angles[YAW] = 90;
+				angles[YAW] = 270;
+				spacing[0] = -15;
+				spacing[1] = 5;
 				break;
 			
 			case MOD_PLASMA:
 			case MOD_PLASMA_SPLASH:
 				handles[0] = cg_weapons[WP_PLASMAGUN].weaponModel;
-				angles[YAW] = 90;
+				angles[YAW] = 270;
+				spacing[0] = -15;
+				spacing[1] = 5;
 				break;
 			
 			case MOD_RAILGUN:
 				handles[0] = cg_weapons[WP_RAILGUN].weaponModel;
-				angles[YAW] = 90;
+				angles[YAW] = 270;
 				break;
 
 			case MOD_BFG:
 			case MOD_BFG_SPLASH:
 				handles[0] = cg_weapons[WP_BFG].weaponModel;
 				handles[1] = cg_weapons[WP_BFG].barrelModel;
-				spacing = 0;
-				angles[YAW] = 90;
+				angles[YAW] = 270;
+				spacing[0] = -15;
+				spacing[1] = 5;
 				break;
 			
 			case MI_HEADSHOT:
 				handles[0] = cgs.media.gibBrain;
-				angles[YAW] = 0;
+				angles[YAW] = 270;
+				spacing[0] = -20;
+				spacing[1] = -20;
 				break;
 
 			case MI_NONE:
@@ -262,16 +280,14 @@ CG_InitObituary
 */
 static void CG_InitObituary( void ) {
 	qhandle_t handles[2];
-	vec3_t origin;
-	vec3_t angles;
+	vec3_t origin = {70, 0, 0};
+	vec3_t angles = {0, 180, 0};
+	vec3_t spacing = {-10, -10, 0};
 
 	handles[0] = cgs.media.gibSkull;
 	handles[1] = 0;
 
-	origin[0] = 70;
-	angles[YAW] = 180;
-
-	CG_RegisterModelInfo( MI_NONE, handles, 0, origin, angles );
+	CG_RegisterModelInfo( MI_NONE, handles, spacing, origin, angles );
 	obitInit = qtrue;
 }
 
@@ -389,6 +405,8 @@ void CG_DrawObituary( void ) {
 		if ( obitStack[i].target[0] == '\0' )
 			continue;
 
+		mi = obitStack[i].mi;
+
 		color = CG_FadeColor( obitStack[i].time, OBIT_FADE_TIME );
 
 		if ( !color ) {
@@ -405,22 +423,20 @@ void CG_DrawObituary( void ) {
 		if ( obitStack[i].attacker[0] != '\0' ) {
 			CG_DrawString( x, y, obitStack[i].attacker, fontFlags, color );
 			x += CG_DrawStrlen( obitStack[i].attacker, fontFlags );
-			x += OBIT_GAP_WIDTH;
+			x += mi->spacing[0];
 		}
-
-		mi = obitStack[i].mi;
 
 		if (mi->handles[1]) {
 			CG_Draw3DModel( x, y-10, OBIT_ICON_WIDTH, OBIT_ICON_HEIGHT, mi->handles[1], NULL, mi->origin, mi->angles );
-			x += mi->barrelSpacing;
+			x += mi->spacing[2];
 		}
 
 		if (mi->handles[0]) {
 			CG_Draw3DModel( x, y-10, OBIT_ICON_WIDTH, OBIT_ICON_HEIGHT, mi->handles[0], NULL, mi->origin, mi->angles );
 		}
 
-		x += OBIT_ICON_WIDTH-15;
-		x += OBIT_GAP_WIDTH;
+		x += OBIT_ICON_WIDTH;
+		x += mi->spacing[1];
 
 		CG_DrawString( x, y, obitStack[i].target, fontFlags, color );
 

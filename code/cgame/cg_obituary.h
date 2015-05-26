@@ -42,17 +42,17 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define OBIT_ICON_HEIGHT 32
 #define OBIT_ICON_WIDTH 64
 
-#define OBIT_SPACING 30
+#define OBIT_SPACING 25
 #define OBIT_GAP_WIDTH 10
 
-static int fontFlags = (UI_PULSE | UI_TINYFONT);
+static int fontFlags = (UI_TINYFONT);
 
 #define MAX_MODEL_INFO 32
 
 typedef struct {
     int mod;
     qhandle_t handles[2];
-    int barrelSpacing;
+    vec3_t spacing;    // before, after, barrelSpacing
     vec3_t origin;
     vec3_t angles;
 } modelInfo_t;
