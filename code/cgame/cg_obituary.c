@@ -38,8 +38,8 @@ Suite 120, Rockville, Maryland 20850 USA.
 
 #define OBIT_FADE_TIME 5000
 
-#define OBIT_POS_X 80
-#define OBIT_POS_Y 320
+#define OBIT_POS_X 40
+#define OBIT_POS_Y 400
 
 #define OBIT_ICON_HEIGHT 32
 #define OBIT_ICON_WIDTH 64
@@ -134,6 +134,8 @@ static void CG_ModelHandles( modelHandles_t *handles, modelID_t modelID ) {
 		handles[0][0] = weapon->weaponModel;
 		if ( weapon->barrelModel )
 			handles[0][1] = weapon->barrelModel;
+	} else {
+		handles[0][0] = cgs.media.gibSkull;
 	}
 }
 
