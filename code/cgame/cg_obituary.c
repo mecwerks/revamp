@@ -41,8 +41,8 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define OBIT_POS_X 80
 #define OBIT_POS_Y 320
 
-#define OBIT_ICON_HEIGHT 12
-#define OBIT_ICON_WIDTH 45
+#define OBIT_ICON_HEIGHT 32
+#define OBIT_ICON_WIDTH 64
 
 #define OBIT_SPACING 30
 #define OBIT_GAP_WIDTH 10
@@ -52,12 +52,90 @@ static int fontFlags = (UI_DROPSHADOW | UI_TINYFONT);
 typedef struct {
 	char	attacker[OBIT_MAX_NAME_LENGTH];
 	char	target[OBIT_MAX_NAME_LENGTH];
-	qhandle_t icon;
+	int 	modelID;
 	int		time;
 } obituary_t;
 
 static int numObits;
 static obituary_t obitStack[OBIT_MAX_VISABLE];
+
+typedef enum {
+	MID_DEFAULT,
+	MID_GAUNTLET,
+	MID_MACHINEGUN,
+	MID_SHOTGUN,
+	MID_LIGHTNING,
+	MID_PLASMAGUN,
+	MID_GRENADEL,
+	MID_ROCKETL,
+	MID_RAILGUN,
+	MID_BFG
+} modelID_t;
+
+typedef qhandle_t modelHandles_t[2];
+
+/*
+===================
+CG_ModelNames
+===================
+*/
+static void CG_ModelHandles( modelHandles_t *handles, modelID_t modelID ) {
+	weaponInfo_t *weapon = NULL;
+	int weaponNum = WP_NONE;
+
+	handles[0][0] = 0;
+	handles[0][1] = 0;
+
+	switch ( modelID ) {
+		case MID_GAUNTLET:
+			weaponNum = WP_GAUNTLET;
+			break;
+
+		case MID_MACHINEGUN:
+			weaponNum = WP_MACHINEGUN;
+			break;
+
+		case MID_SHOTGUN:
+			weaponNum = WP_SHOTGUN;
+			break;
+
+		case MID_LIGHTNING:
+			weaponNum = WP_LIGHTNING;
+			break;
+
+		case MID_PLASMAGUN:
+			weaponNum = WP_PLASMAGUN;
+			break;
+
+		case MID_GRENADEL:
+			weaponNum = WP_GRENADE_LAUNCHER;
+			break;
+
+		case MID_ROCKETL:
+			weaponNum = WP_ROCKET_LAUNCHER;
+			break;
+
+		case MID_RAILGUN:
+			weaponNum = WP_RAILGUN;
+			break;
+
+		case MID_BFG:
+			weaponNum = WP_BFG;
+			break;
+
+		case MID_DEFAULT:
+		default:
+			break;
+	}
+
+	if ( weaponNum != WP_NONE ) {
+		weapon = &cg_weapons[weaponNum];
+
+		handles[0][0] = weapon->weaponModel;
+		if ( weapon->barrelModel )
+			handles[0][1] = weapon->barrelModel;
+	}
+}
 
 /*
 ===================
@@ -112,8 +190,6 @@ static void CG_CountObits( void ) {
 #endif
 }
 
-static qhandle_t defaultObitIcon = 0;
-
 /*
 ===================
 CG_DrawObituary
@@ -123,9 +199,8 @@ void CG_DrawObituary( void ) {
 	int i;
 	float *color;
 	float x, y;
-
-	if ( !defaultObitIcon )
-		defaultObitIcon = trap_R_RegisterShader("icons/obituary/test");
+	modelHandles_t modelHandles = {0, 0};
+	vec3_t angles, origin;
 
 	CG_SetScreenPlacement( PLACE_LEFT, PLACE_BOTTOM );
 
@@ -152,9 +227,24 @@ void CG_DrawObituary( void ) {
 			x += OBIT_GAP_WIDTH;
 		}
 
-		CG_DrawPic( x, y, OBIT_ICON_WIDTH, OBIT_ICON_HEIGHT, obitStack[i].icon );
+		CG_ModelHandles( &modelHandles, obitStack[i].modelID );
 
-		x += OBIT_ICON_WIDTH;
+		angles[YAW] = 90;
+		origin[0] = 70;
+		origin[1] = 0;
+		origin[2] = 0;
+
+		if (modelHandles[1]) {
+			CG_Draw3DModel( x, y-10, OBIT_ICON_WIDTH, OBIT_ICON_HEIGHT, modelHandles[1], NULL, origin, angles );
+			if ( modelHandles[1] == cg_weapons[WP_MACHINEGUN].barrelModel )
+				x += 15;
+		}
+
+		if (modelHandles[0]) {
+			CG_Draw3DModel( x, y-10, OBIT_ICON_WIDTH, OBIT_ICON_HEIGHT, modelHandles[0], NULL, origin, angles );
+		}
+
+		x += OBIT_ICON_WIDTH-15;
 		x += OBIT_GAP_WIDTH;
 
 		CG_DrawString( x, y, obitStack[i].target, fontFlags, color );
@@ -185,7 +275,7 @@ static void CG_ShiftObituaryStack( void ) {
 CG_AddObituary
 ===================
 */
-static void CG_AddObituary( char *attackerName, char *targetName, char *icon, qboolean weapon ) {
+static void CG_AddObituary( char *attackerName, char *targetName, int modelID ) {
 	if ( numObits >= OBIT_MAX_VISABLE ) {
 		CG_ShiftObituaryStack();
 		CG_CountObits();
@@ -199,10 +289,7 @@ static void CG_AddObituary( char *attackerName, char *targetName, char *icon, qb
 	CG_ShiftObituaryStack();
 	CG_CountObits();
 
-	obitStack[0].icon = trap_R_RegisterShader( weapon ? icon : va("icons/obituary/%s", icon) );
-
-	if ( !obitStack[0].icon )
-		obitStack[0].icon = defaultObitIcon;
+	obitStack[0].modelID = modelID;
 
 	if ( attackerName )
 		Q_strncpyz( obitStack[0].attacker, attackerName, sizeof(obitStack[0].attacker) );
@@ -212,55 +299,58 @@ static void CG_AddObituary( char *attackerName, char *targetName, char *icon, qb
 	obitStack[0].time = cg.time;
 }
 
-typedef struct {
-	int mod;
-	char *icon;
-} obitIcon_t;
-
-static obitIcon_t obitIcons[] = {
-	{ -1, "headshot" },
-	{ MOD_SUICIDE, "suicide" },
-	{ MOD_ASSISTED_SUICIDE, "assist_suicide" },
-	{ MOD_FALLING, "fall" },
-	{ MOD_CRUSH, "crush" },
-	{ MOD_WATER, "water" },
-	{ MOD_SLIME, "slime" },
-	{ MOD_LAVA, "lava" },
-	{ MOD_TARGET_LASER, "target_laser" },
-	{ MOD_TRIGGER_HURT, "trigger_hurt" },
-	{ MOD_TELEFRAG, "telefrag" },
-	// weapons
-	{ MOD_GAUNTLET, "gauntlet" },
-	{ MOD_MACHINEGUN, "machinegun" },
-	{ MOD_SHOTGUN, "shotgun" },
-	{ MOD_GRENADE, "grenade" },
-	{ MOD_GRENADE_SPLASH, "grenade_splash" },
-	{ MOD_ROCKET, "rocket" },
-	{ MOD_ROCKET_SPLASH, "rocket_splash" },
-	{ MOD_PLASMA, "plasma" },
-	{ MOD_PLASMA_SPLASH, "plasma_splash" },
-	{ MOD_LIGHTNING, "lightning" },
-	{ MOD_RAILGUN, "railgun" },
-	{ MOD_BFG, "bfg" },
-	{ MOD_BFG_SPLASH, "bfg_splash" }
-};
-
-static int obitIconLen = ARRAY_LEN(obitIcons);
-
 /*
 ===================
-CG_ObitIcon
+CG_ObitModelID
 ===================
 */
-static char *CG_ObitIcon( int mod ) {
-	int i;
+static int CG_ObitModelID( int meansOfDeath ) {
+	switch ( meansOfDeath ) {
+		case MOD_SUICIDE:
+		case MOD_ASSISTED_SUICIDE:
+		case MOD_TRIGGER_HURT:
+		case MOD_TARGET_LASER:
+		case MOD_CRUSH:
+		case MOD_TELEFRAG:
+		case MOD_WATER:
+		case MOD_SLIME:
+		case MOD_LAVA:
+		case MOD_FALLING:
+		case MOD_GRAPPLE:
+		default:
+			return MID_DEFAULT;
 
-	for ( i = 0; i < obitIconLen; i++ ) {
-		if ( obitIcons[i].mod == mod )
-			return obitIcons[i].icon;
+		case MOD_GAUNTLET:
+			return MID_GAUNTLET;
+
+		case MOD_MACHINEGUN:
+			return MID_MACHINEGUN;
+		
+		case MOD_SHOTGUN:
+			return MID_SHOTGUN;
+
+		case MOD_GRENADE:
+		case MOD_GRENADE_SPLASH:
+			return MID_GRENADEL;
+
+		case MOD_ROCKET:
+		case MOD_ROCKET_SPLASH:
+			return MID_ROCKETL;
+
+		case MOD_LIGHTNING:
+			return MID_LIGHTNING;
+
+		case MOD_PLASMA:
+		case MOD_PLASMA_SPLASH:
+			return MID_PLASMAGUN;
+
+		case MOD_RAILGUN:
+			return MID_RAILGUN;
+
+		case MOD_BFG:
+		case MOD_BFG_SPLASH:
+			return MID_BFG;
 	}
-
-	return NULL;
 }
 
 /*
@@ -271,26 +361,20 @@ CG_ParseObituary
 void CG_ParseObituary( entityState_t *ent ) {
 	int 	mod;
 	int 	target, attacker;
-	char 	*icon;
 	const char 	*targetInfo;
 	const char 	*attackerInfo;
 	char 	targetName[OBIT_MAX_NAME_LENGTH];
 	char 	attackerName[OBIT_MAX_NAME_LENGTH];
-//	playerInfo_t	*pi;
 	int i;
-	qboolean headshot;
 
 	target = ent->otherEntityNum;
 	attacker = ent->otherEntityNum2;
 	mod = ent->eventParm;
-	headshot = ent->eFlags & EF_HEADSHOT;
 
 	if ( target < 0 || target >= MAX_CLIENTS ) {
 		Com_Printf( "CG_ParseObituary: target out of range!\n" );
 		return;
 	}
-
-//	pi = &cgs.playerinfo[target];
 
 	if ( attacker < 0 || attacker >= MAX_CLIENTS ) {
 		attacker = ENTITYNUM_WORLD;
@@ -309,11 +393,8 @@ void CG_ParseObituary( entityState_t *ent ) {
 	Q_strncpyz( targetName, Info_ValueForKey( targetInfo, "n" ), sizeof(targetName) );
 	strcat( targetName, S_COLOR_WHITE );
 
-	if ( headshot ) icon = CG_ObitIcon( -1 );
-	else icon = CG_ObitIcon( mod );
-
 	if ( (attacker == ENTITYNUM_WORLD) || (attacker == target) ) {
-		CG_AddObituary( NULL, targetName, icon, qfalse );
+		CG_AddObituary( NULL, targetName, MID_DEFAULT );
 		return;
 	}
 
@@ -353,9 +434,9 @@ void CG_ParseObituary( entityState_t *ent ) {
 	}
 
 	if ( attacker != ENTITYNUM_WORLD ) {
-		CG_AddObituary( attackerName, targetName, icon, qtrue );
+		CG_AddObituary( attackerName, targetName, CG_ObitModelID(mod) );
 		return;
 	}
 
-	CG_AddObituary( NULL, targetName, "died", qfalse );
+	CG_AddObituary( NULL, targetName, MID_DEFAULT );
 }
