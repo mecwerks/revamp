@@ -149,7 +149,7 @@ static void CG_ShiftObituaryStack( void ) {
 CG_AddObituary
 ===================
 */
-static void CG_AddObituary( char *attackerName, char *targetName, int mod ) {
+static void CG_AddObituary( char *attackerName, char *targetName, team_t attackerTeam, team_t targetTeam, int mod ) {
 	modelInfo_t *mi = NULL;
 
 	if ( numObits >= OBIT_MAX_VISABLE ) {
@@ -271,6 +271,9 @@ static void CG_AddObituary( char *attackerName, char *targetName, int mod ) {
 
 	Q_strncpyz( obitStack[0].target, targetName, sizeof(obitStack[0].target) );
 
+	obitStack[0].attackerTeam = attackerTeam;
+	obitStack[0].targetTeam = targetTeam;
+
 	obitStack[0].time = cg.time;
 }
 
@@ -290,27 +293,6 @@ static void CG_InitObituary( void ) {
 
 	CG_RegisterModelInfo( MI_NONE, handles, spacing, origin, angles );
 	obitInit = qtrue;
-}
-
-/*
-===================
-CG_ColorNameForTeam
-===================
-*/
-static void CG_ColorNameForTeam( char *name, team_t team ) {
-	char *color = NULL;
-
-	if ( team == TEAM_FREE || team == TEAM_SPECTATOR )
-		return;
-
-
-	if ( team == TEAM_BLUE )
-		color = S_COLOR_BLUE;
-	else
-		color = S_COLOR_RED;
-
-	RemoveColorEscapeSequences(name);
-	Q_strncpyz(name, va("%s%s", color, name), OBIT_MAX_NAME_LENGTH);
 }
 
 /*
@@ -357,12 +339,10 @@ void CG_ParseObituary( entityState_t *ent ) {
 	}
 
 	Q_strncpyz( targetName, Info_ValueForKey( targetInfo, "n" ), sizeof(targetName) );
-	strcat( targetName, S_COLOR_WHITE );
-
-	CG_ColorNameForTeam( targetName, targetpi->team );
+	strcat(targetName, S_COLOR_WHITE);
 
 	if ( (attacker == ENTITYNUM_WORLD) || (attacker == target) ) {
-		CG_AddObituary( NULL, targetName, mod );
+		CG_AddObituary( NULL, targetName, -1, targetpi->team, mod );
 		return;
 	}
 
@@ -395,8 +375,6 @@ void CG_ParseObituary( entityState_t *ent ) {
 		Q_strncpyz( attackerName, Info_ValueForKey( attackerInfo, "n" ), sizeof(attackerName) );
 		strcat( attackerName, S_COLOR_WHITE );
 
-		CG_ColorNameForTeam( attackerName, attackerpi->team );
-		
 		for ( i = 0; i < CG_MaxSplitView(); i++ ) {
 			if ( target == cg.snap->pss[i].playerNum )
 				Q_strncpyz( cg.localPlayers[i].killerName, attackerName, sizeof(cg.localPlayers[i].killerName) );
@@ -405,16 +383,20 @@ void CG_ParseObituary( entityState_t *ent ) {
 
 	if ( attacker != ENTITYNUM_WORLD ) {
 		if ( cgs.gametype >= GT_TEAM && targetpi->team == attackerpi->team )
-			CG_AddObituary( attackerName, targetName, MI_SAMETEAM );
+			mod = MI_SAMETEAM;
 		else if ( ent->eFlags & EF_HEADSHOT )
-			CG_AddObituary( attackerName, targetName, MI_HEADSHOT );
-		else
-			CG_AddObituary( attackerName, targetName, mod );
+			mod = MI_HEADSHOT;
+		
+		CG_AddObituary( attackerName, targetName, attackerpi->team, targetpi->team, mod );
 		return;
 	}
 
-	CG_AddObituary( NULL, targetName, MI_NONE );
+	CG_AddObituary( NULL, targetName, -1, targetpi->team, MI_NONE );
 }
+
+static float obitRedColor[4] = { 1.0f, 0.1f, 0.1f, 1.0f };
+static float obitBlueColor[4] = { 0.1f, 0.1f, 1.0f, 1.0f };
+static float obitNormalColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 /*
 ===================
@@ -424,6 +406,8 @@ CG_DrawObituary
 void CG_DrawObituary( void ) {
 	int i;
 	float *color;
+	float drawColor[4];
+	float *teamColor;
 	float x, y;
 	modelInfo_t *mi;
 
@@ -446,15 +430,28 @@ void CG_DrawObituary( void ) {
 			continue;
 		}
 
-		trap_R_SetColor( color );
-
 		y = OBIT_POS_Y - ( i * OBIT_SPACING );
 		x = OBIT_POS_X;
 
 		if ( obitStack[i].attacker[0] != '\0' ) {
-			CG_DrawString( x, y, obitStack[i].attacker, fontFlags, color );
+			if ( cgs.gametype >= GT_TEAM ) {
+				teamColor = (obitStack[i].attackerTeam == TEAM_RED) ? obitRedColor : obitBlueColor;
+				RemoveColorEscapeSequences(obitStack[i].attacker);
+			} else {
+				teamColor = obitNormalColor;
+			}
+
+			drawColor[0] = color[0] * teamColor[0];
+			drawColor[1] = color[1] * teamColor[1];
+			drawColor[2] = color[2] * teamColor[2];
+			drawColor[3] = color[3] * teamColor[3];
+
+			trap_R_SetColor( drawColor );
+			CG_DrawString( x, y, obitStack[i].attacker, fontFlags, drawColor );
 			x += CG_DrawStrlen( obitStack[i].attacker, fontFlags );
 			x += mi->spacing[0];
+		} else {
+			x -= 20;
 		}
 
 		if (mi->handles[1]) {
@@ -469,7 +466,20 @@ void CG_DrawObituary( void ) {
 		x += OBIT_ICON_WIDTH;
 		x += mi->spacing[1];
 
-		CG_DrawString( x, y, obitStack[i].target, fontFlags, color );
+		if ( cgs.gametype >= GT_TEAM ) {
+			teamColor = (obitStack[i].targetTeam == TEAM_RED) ? obitRedColor : obitBlueColor;
+			RemoveColorEscapeSequences(obitStack[i].target);
+		} else {
+			teamColor = obitNormalColor;
+		}
+
+		drawColor[0] = color[0] * teamColor[0];
+		drawColor[1] = color[1] * teamColor[1];
+		drawColor[2] = color[2] * teamColor[2];
+		drawColor[3] = color[3] * teamColor[3];
+
+		trap_R_SetColor( drawColor );
+		CG_DrawString( x, y, obitStack[i].target, fontFlags, drawColor );
 
 		trap_R_SetColor( NULL );
 	}

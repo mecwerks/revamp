@@ -45,7 +45,7 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define OBIT_SPACING 25
 #define OBIT_GAP_WIDTH 10
 
-static int fontFlags = (UI_DROPSHADOW | UI_TINYFONT);
+static int fontFlags = (UI_PULSE|UI_TINYFONT);
 
 #define MAX_MODEL_INFO 32
 
@@ -64,6 +64,8 @@ typedef struct {
 typedef struct {
     char    attacker[OBIT_MAX_NAME_LENGTH];
     char    target[OBIT_MAX_NAME_LENGTH];
+    team_t  attackerTeam;
+    team_t  targetTeam;
     int     time;
     modelInfo_t *mi;
 } obituary_t;
