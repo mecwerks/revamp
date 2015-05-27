@@ -252,6 +252,7 @@ static void CG_AddObituary( char *attackerName, char *targetName, int mod ) {
 				spacing[1] = -20;
 				break;
 
+			case MI_SAMETEAM:
 			case MI_NONE:
 			case MOD_UNKNOWN:
 			default:
@@ -293,12 +294,34 @@ static void CG_InitObituary( void ) {
 
 /*
 ===================
+CG_ColorNameForTeam
+===================
+*/
+static void CG_ColorNameForTeam( char *name, team_t team ) {
+	char *color = NULL;
+
+	if ( team == TEAM_FREE || team == TEAM_SPECTATOR )
+		return;
+
+
+	if ( team == TEAM_BLUE )
+		color = S_COLOR_BLUE;
+	else
+		color = S_COLOR_RED;
+
+	RemoveColorEscapeSequences(name);
+	Q_strncpyz(name, va("%s%s", color, name), OBIT_MAX_NAME_LENGTH);
+}
+
+/*
+===================
 CG_ParseObituary
 ===================
 */
 void CG_ParseObituary( entityState_t *ent ) {
 	int 	mod;
 	int 	target, attacker;
+	playerInfo_t	*targetpi, *attackerpi;
 	const char 	*targetInfo;
 	const char 	*attackerInfo;
 	char 	targetName[OBIT_MAX_NAME_LENGTH];
@@ -310,6 +333,8 @@ void CG_ParseObituary( entityState_t *ent ) {
 
 	target = ent->otherEntityNum;
 	attacker = ent->otherEntityNum2;
+	targetpi = &cgs.playerinfo[ target ];
+	attackerpi = &cgs.playerinfo[ attacker ];
 	mod = ent->eventParm;
 
 	if ( target < 0 || target >= MAX_CLIENTS ) {
@@ -333,6 +358,8 @@ void CG_ParseObituary( entityState_t *ent ) {
 
 	Q_strncpyz( targetName, Info_ValueForKey( targetInfo, "n" ), sizeof(targetName) );
 	strcat( targetName, S_COLOR_WHITE );
+
+	CG_ColorNameForTeam( targetName, targetpi->team );
 
 	if ( (attacker == ENTITYNUM_WORLD) || (attacker == target) ) {
 		CG_AddObituary( NULL, targetName, mod );
@@ -368,6 +395,8 @@ void CG_ParseObituary( entityState_t *ent ) {
 		Q_strncpyz( attackerName, Info_ValueForKey( attackerInfo, "n" ), sizeof(attackerName) );
 		strcat( attackerName, S_COLOR_WHITE );
 
+		CG_ColorNameForTeam( attackerName, attackerpi->team );
+		
 		for ( i = 0; i < CG_MaxSplitView(); i++ ) {
 			if ( target == cg.snap->pss[i].playerNum )
 				Q_strncpyz( cg.localPlayers[i].killerName, attackerName, sizeof(cg.localPlayers[i].killerName) );
@@ -375,7 +404,9 @@ void CG_ParseObituary( entityState_t *ent ) {
 	}
 
 	if ( attacker != ENTITYNUM_WORLD ) {
-		if ( ent->eFlags & EF_HEADSHOT )
+		if ( cgs.gametype >= GT_TEAM && targetpi->team == attackerpi->team )
+			CG_AddObituary( attackerName, targetName, MI_SAMETEAM );
+		else if ( ent->eFlags & EF_HEADSHOT )
 			CG_AddObituary( attackerName, targetName, MI_HEADSHOT );
 		else
 			CG_AddObituary( attackerName, targetName, mod );
