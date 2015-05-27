@@ -1317,7 +1317,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 
 	// save some from armor
-	if ( !g_instaGib.integer ) {
+	if ( !g_instaGib.integer && !(!g_selfDamage.integer && (targ == attacker))) {
 		asave = CheckArmor (targ, take, dflags);
 		take -= asave;
 	}
