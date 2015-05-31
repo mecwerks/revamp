@@ -123,6 +123,7 @@ vmCvar_t	g_footSteps;
 vmCvar_t	g_fixedFOV;
 vmCvar_t	g_weaponMods;
 vmCvar_t	g_instaGib;
+vmCvar_t	g_offHandHook;
 
 static cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -212,8 +213,8 @@ static cvarTable_t		gameCvarTable[] = {
 	{ &g_footSteps, "g_footSteps", "1", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
 	{ &g_fixedFOV, "g_fixedFOV", "0", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL },
 	{ &g_weaponMods, "g_weaponMods", "0", CVAR_LATCH, 0, RANGE_BOOL },
-	{ &g_instaGib, "g_instaGib", "0", CVAR_SERVERINFO | CVAR_LATCH, GCF_DO_RESTART, RANGE_ALL }
-
+	{ &g_instaGib, "g_instaGib", "0", CVAR_SERVERINFO | CVAR_LATCH, GCF_DO_RESTART, RANGE_ALL },
+	{ &g_offHandHook, "g_offHandHook", "1", CVAR_ARCHIVE, GCF_TRACK_CHANGE, RANGE_BOOL }
 };
 
 static int gameCvarTableSize = ARRAY_LEN( gameCvarTable );

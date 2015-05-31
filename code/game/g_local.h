@@ -383,6 +383,8 @@ struct gplayer_s {
 #endif
 
 	char		*areabits;
+
+	qboolean	hookFired;			// grapple hook
 };
 
 
@@ -631,6 +633,7 @@ void DropPortalDestination( gentity_t *ent );
 qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker );
 void CalcMuzzlePoint ( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint );
 qboolean CheckGauntletAttack( gentity_t *ent );
+void Weapon_GrapplingHook_Fire (gentity_t *ent);
 void Weapon_HookFree (gentity_t *ent);
 void Weapon_HookThink (gentity_t *ent);
 
@@ -840,3 +843,4 @@ extern	vmCvar_t	g_footSteps;
 extern	vmCvar_t	g_fixedFOV;
 extern 	vmCvar_t	g_weaponMods;
 extern 	vmCvar_t	g_instaGib;
+extern 	vmCvar_t	g_offHandHook;
