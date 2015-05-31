@@ -252,7 +252,6 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 //======================================================================
 
 int Pickup_Health (gentity_t *ent, gentity_t *other) {
-	int			max;
 	int			quantity;
 
 	if ( ent->count )

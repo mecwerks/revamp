@@ -143,9 +143,9 @@ MACHINEGUN
 #define CHAINGUN_SPREAD		600
 #define CHAINGUN_DAMAGE		7
 #endif
-#define MACHINEGUN_SPREAD	200
-#define	MACHINEGUN_DAMAGE	8
-#define	MACHINEGUN_TEAM_DAMAGE	8
+#define MACHINEGUN_SPREAD	180
+#define	MACHINEGUN_DAMAGE	12
+#define	MACHINEGUN_TEAM_DAMAGE	MACHINEGUN_DAMAGE
 
 void Bullet_Fire (gentity_t *ent, float spread, int damage, int mod ) {
 	trace_t		tr;
