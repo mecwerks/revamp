@@ -165,23 +165,6 @@ gitem_t	bg_itemlist[] =
 /* sounds */ ""
 	},
 
-/*QUAKED item_health_mega (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
-*/
-	{
-		"item_health_mega",
-		"sound/items/m_health.wav",
-        { "models/powerups/health/mega_cross.md3", 
-		"models/powerups/health/mega_sphere.md3", 
-		NULL, NULL },
-/* icon */		"icons/iconh_mega",
-/* pickup */	"Mega Health",
-		100,
-		IT_HEALTH,
-		0,
-/* sounds */ ""
-	},
-
-
 	//
 	// WEAPONS 
 	//
@@ -591,6 +574,23 @@ gitem_t	bg_itemlist[] =
 		PW_FLIGHT,
 /* sounds */ "sound/items/flight.wav"
 	},
+
+	/*QUAKED item_health_mega (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
+*/
+	{
+		"item_health_mega",
+		"sound/items/m_health.wav",
+        { "models/powerups/health/mega_cross.md3", 
+		"models/powerups/health/mega_sphere.md3", 
+		NULL, NULL },
+/* icon */		"icons/iconh_mega",
+/* pickup */	"Mega Health",
+		100,
+		IT_POWERUP,
+		PW_MEGA,
+/* sounds */ ""
+	},
+
 
 /*QUAKED team_CTF_redflag (1 0 0) (-16 -16 -16) (16 16 16)
 Only in CTF games

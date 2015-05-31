@@ -1180,17 +1180,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		return;
 	}
 #endif
-	// reduce damage by the attacker's handicap value
-	// unless they are rocket jumping
-	if ( attacker->player && attacker != targ ) {
-		max = attacker->player->ps.stats[STAT_MAX_HEALTH];
-#ifdef MISSIONPACK
-		if( BG_ItemForItemNum( attacker->player->ps.stats[STAT_PERSISTANT_POWERUP] )->giTag == PW_GUARD ) {
-			max /= 2;
-		}
-#endif
-		damage = damage * max / 100;
-	}
 
 	player = targ->player;
 
@@ -1284,6 +1273,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 		damage *= 0.5;
 	}
+
+	// Mega Health reduces damage by 50%
+	if ( targ->player && targ->player->ps.powerups[PW_MEGA] )
+		damage *= 0.5;
 
 	// add to the attacker's hit counter (if the target isn't a general entity like a prox mine)
 	if ( attacker->player && player

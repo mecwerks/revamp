@@ -255,35 +255,17 @@ int Pickup_Health (gentity_t *ent, gentity_t *other) {
 	int			max;
 	int			quantity;
 
-	// small and mega healths will go over the max
-#ifdef MISSIONPACK
-	if( BG_ItemForItemNum( other->player->ps.stats[STAT_PERSISTANT_POWERUP] )->giTag == PW_GUARD ) {
-		max = other->player->ps.stats[STAT_MAX_HEALTH];
-	}
-	else
-#endif
-	if ( ent->item->quantity != 5 && ent->item->quantity != 100 ) {
-		max = other->player->ps.stats[STAT_MAX_HEALTH];
-	} else {
-		max = other->player->ps.stats[STAT_MAX_HEALTH] * 2;
-	}
-
-	if ( ent->count ) {
+	if ( ent->count )
 		quantity = ent->count;
-	} else {
+	else
 		quantity = ent->item->quantity;
-	}
 
 	other->health += quantity;
 
-	if (other->health > max ) {
-		other->health = max;
-	}
-	other->player->ps.stats[STAT_HEALTH] = other->health;
+	if (other->health > MAX_HEALTH )
+		other->health = MAX_HEALTH;
 
-	if ( ent->item->quantity == 100 ) {		// mega health respawns slow
-		return RESPAWN_MEGAHEALTH;
-	}
+	other->player->ps.stats[STAT_HEALTH] = other->health;
 
 	return RESPAWN_HEALTH;
 }

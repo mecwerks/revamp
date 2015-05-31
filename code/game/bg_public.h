@@ -49,6 +49,8 @@ Suite 120, Rockville, Maryland 20850 USA.
 #define	GIB_HEALTH			-40
 #define	ARMOR_PROTECTION	0.66
 
+#define MAX_HEALTH 			100
+
 #define	MAX_LOCATIONS		64
 
 #define	MAX_SAY_TEXT	150
@@ -591,6 +593,8 @@ typedef enum {
 	PW_REGEN,
 	PW_FLIGHT,
 
+	PW_MEGA,
+	
 	PW_REDFLAG,
 	PW_BLUEFLAG,
 	PW_NEUTRALFLAG,
